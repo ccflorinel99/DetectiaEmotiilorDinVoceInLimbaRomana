@@ -1,0 +1,26 @@
+2.031746	3.668753	[N] [] [apelant] Mă puteți ajuta, vă rog? 
+3.935782	5.781769	[N] [] [operator] Aveți formularele la dumneavoastră?
+5.955918	6.826667	[N] [] [apelant] Da, desigur.
+7.976054	9.322812	[N] [] [operator] Vă rog să mi le prezentați. 
+11.760907	12.805805	[N] [] [apelant] Este vreo problemă?
+13.618503	15.568980	[N] [] [operator] Cine v-a direcționat către acest ghișeu?
+15.847619	18.599184	[N] [] [apelant] Dumneavoastră. Ați fost în faţa mea şi m-aţi direcţionat. 
+18.599184	24.589932	[N] [] [operator] Ȋn regulă, însă nu v-am spus să și aşteptaţi la acest ghişeu pentru a completa tipul de formular pe care îl aveţi acum.
+24.729252	31.439819	[N] [] [apelant] Ce este de fapt în neregulă? Ȋl pot schimba, dacă îmi permiteţi. Este un formular tipizat prin care solicit o nouă carte de identitate.
+31.439819	42.376417	[N] [] [operator] Nu-l puteţi schimba... Nu este acesta ghişeul pentru tipul de formular solicitat de dumneavoastră. Dacă intenţionaţi să completaţi un astfel de formular, aveţi nevoie de o altă formă de identificare asupra dumneavoastră.
+42.480907	52.755737	[N] [] [apelant] Poftim? Eu sunt în curs de a obţine o nouă carte de identitate. Acesta este motivul pentru care mă aflu aici. Mi-a fost furat portofelul!
+52.755737	59.222494	[B] [] [operator]  Hhh, nu se poate... Pentru a vă identifica, va trebui să prezentaţi o altă formă de identificare.
+59.582404	69.764354	[N] [voci fundal] [apelant] Cum aş putea să prezint o carte de identitate fără a deţine o carte de identitate? Ȋn primul rând, cum îşi poate cineva obţine cartea de identitate?
+66.002721	66.885079	[I] [voci fundal] [operator] Nu știu...
+69.764354	76.509751	[I] [voci fundal] [operator] Nu știu. Dar am nevoie de un act de identitate pentru a transmite acest formular. Nu pot să-l trimit fără un act de identitate aferent.
+75.580952	82.233469	[I] [voci fundal] [apelant] Mă aflu aici pentru a... îîî, pentru a obţine o carte de identi...
+82.233469	85.333333	[I] [] [operator]  Identificare domnule! Nu cartea dumneavoastră de identitate.
+85.426213	88.177778	[N] [] [apelant] Cum ar fi un certificat de naştere, de pildă?!
+88.177778	97.338050	[B] [voci fundal] [operator] Hhh, un certificat de naștere, un pașaport, o legitimaţie de student... Bănuiesc că aveţi studii, nu...? Sau orice altă formă...
+96.072562	107.578050	[N] [voci fundal] [apelant] Cine naiba umblă cu certificatul de naştere la el? Mi-a fost furat portofelul, n-am nimic. N-am card de credit, n-am nici carte de identitate. Nu se găsesc copii în baza dumneavoastră de date de aici? 
+107.705760	114.776236	[I] [voci fundal] [operator] Da, există un fişer cu datele dumneavoastră de identificare însă avem nevoie de actul de identitate pentru a-l putea accesa.
+113.603628	129.033288	[D] [voci fundal] [apelant] Aaa! Deci... pa... pare că lucrurile au scăpat de sub control, hihi! Nu înțeleg de ce este atât de complicat să rezolvăm o astfel de situaţie. E o procedură simplă. Solicit eliberarea unei noi cărţi de identitate. De cât timp lucraţi aici? 
+129.126168	132.214422	[B] [] [operator] De ceva vreme. Pot spune că am chiar vechime.
+135.302676	140.144036	[D] [] [apelant] Ăăă, da..., cu certitudine, cu certitudine. Aveţi un şef direct căruia să mă adresez?
+140.144036	147.377052	[I] [voci fundal] [operator] Da. Doriţi să vă adresaţi şefului meu direct, da?…Vreţi să îl cunoaşteţi pe şeful meu direct? Bine… Mă întorc imediat.  
+146.901043	148.340680	[I] [voci fundal] [apelant] Da, aș vrea să îl chemați. 

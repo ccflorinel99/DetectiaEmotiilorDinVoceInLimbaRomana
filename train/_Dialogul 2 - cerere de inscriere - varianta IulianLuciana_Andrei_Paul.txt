@@ -1,0 +1,25 @@
+1.451247	7.209796	[S] [] [apelant] Bună ziua. Mă puteţi ajuta, vă rog? Aş dori să depun acesastă cerere pentru a mă înscrie.
+7.209796	18.924263	[N] [] [operator] Bună ziua. Aş vrea să văd mai întâi despre ce este vorba. Mdaaa... Avem nevoie… avem nevoie de certificatul dumneavoastră de naştere în original.
+19.504762	24.996281	[F] [] [apelant] Ah. Certificatul meu de naştere în original? Dar nu îl am la mine. 
+24.996281	27.492426	[N] [] [operator] E drept. Ȋnsă noi tot avem nevoie de el.
+27.492426	30.511020	[N] [] [apelant]  Acceptaţi permisul de conducere în schimb? 
+30.511020	35.503311	[N] [] [operator] Din păcate nu. Nu v-a spus nimeni că aveţi nevoie de certificatul dumneavoastră de naştere în original?
+35.503311	48.936054	[S] [] [apelant] Nu. Pe formular nu se specifică acest lucru. De fapt, doar este menţionată o altă formă de identificare, fără a se preciza care anume. Dacă aş fi ştiut, aş fi adus certificatul de naştere în original. Ȋmi pare rău.  
+48.959274	52.001088	[N] [] [operator] Ȋmi pare rău, însă nu vă pot ajuta. Va trebui să reveniţi.
+52.001088	57.504218	[S] [voci fundal] [apelant] Ştiţi…am stat mult timp la o asemenea coadă. Vedeţi doar cât este de mare. Este ora prânzului…
+57.028209	65.515102	[N] [voci fundal] [operator] Vă înţeleg. Coada este mare, însă nu vă pot ajuta fără …aveţi cumva la dumneavoastră cardul de asigurare socială? 
+65.515102	76.010522	[S] [] [apelant] Ei bine, nu. Nu umblu cu... Nu port niciodată documentele originale cu mine de teamă să nu le pierd. Dacă se întâmplă să pierd portofelul, de exemplu? Adio acte.
+76.010522	79.818594	[N] [] [apelant] Paşaportul şi permisul de conducere este tot ce am la mine.
+79.818594	87.492789	[N] [] [operator] Vă înţeleg, însă nu am cum să vă ajut. Cred doar că va trebui să reveniţi cu actele necesare pentru a vă putea ajuta.
+87.492789	98.882177	[S] [voci fundal] [apelant] Chiar nu se poate face nimic? Nu puteţi face o excepţie de data aceasta? Atât paşaportul, cât şi permisul de conducere sunt forme de identificare cu poză. Puteţi constata, doar că eu sunt.
+97.988209	100.495964	[N] [voci fundal] [apelant] Nu se poate. Nu se poate.
+100.495964	103.642268	[N] [] [apelant] Vă pot da numărul meu de… numărul de…  numărul... 
+103.642268	116.494512	[I] [voci fundal] Dacă fac o excepţie pentru dumneavoastră, se impune să fac o excepţie pentru toată lumea. Vă înţeleg… Cunosc sentimentul prin care treceţi… Știu că este frustrant, însă nu vă pot ajuta. Va trebui să reveniţi.
+114.497596	119.013878	[N] [voci fundal] [apelant] Ei bine… vă pot da numărul... vă pot da numărul meu de asigurare socială.
+119.013878	120.523175	[I] [] [operator] Nu se poate.
+120.523175	125.283265	[N] [voci fundal] [apelant] De asemenea, vă pot da ăăă... numele părinţilor, locul naşterii, data şi ora la care m-am născut.
+124.900136	133.712109	[B] [voci fundal] [operator] Ȋnţeleg, însă nu am nevoie de aceste date… Ele nu reprezintă o dovadă de identificare. Nu am cum să îmi dau seama că sunteţi chiar dumneavoastră. Am nevoie de…
+133.712109	144.010159	[S] [] [apelant] Nu pot merge acasă după acte. Trebuie să mă întorc la serviciu.  Nu am timp să mă întorc acasă pentru a lua actele, ca mai apoi să mă întorc la coadă și să aștept încă patruzeci și cinci de minute...
+144.161088	149.908027	[N] [] [operator] Ei bine, știți ce? Week-end-urile nu sunt la fel de aglomerate. Poate încercaţi să ajungeţi aici mai devreme…
+149.908027	157.512562	[S] [] [operator] Am copii. Trebuie să mă ocup de ei în week-end. Nu am timp să mă întorc aici. Chiar vă rog! Chiar am nevoie să mă ajutaţi!   
+157.512562	161.657324	[B] [] [operator] Nu se poate. Nu pot face nimic. Îmi pare rău.

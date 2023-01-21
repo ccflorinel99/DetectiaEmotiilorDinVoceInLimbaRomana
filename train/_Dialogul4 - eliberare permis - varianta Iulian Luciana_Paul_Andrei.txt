@@ -1,0 +1,43 @@
+2.287166	9.891701	[B] [] [apelant] Ăăăhh... Bună ziua. Am luat la rând cinci ghișee dar nimeni nu pare să îmi spună ce trebuie să fac. Aștept aici de mai bine de o oră. Mă puteți ajuta, vă rog?
+9.891701	13.490794	[N] [] [operator] Să vedem despre ce este vorba. De ce anume aveți nevoie exact?
+13.490794	19.934331	[N] [] [apelant] Uitați, am completat toate formularele dar nu am putut să le depun la niciun ghișeu de până acum. Sunt trimis de colo colo.
+20.096871	22.778776	[N] [voci] [operator] Practic aveți nevoie de un nou permis. Așa e?
+22.058957	26.366259	[N] [voci fundal] [apelant] Ex... Exact! Da. Pur și simplu doresc eliberarea unui nou permis.
+26.412698	28.676644	[N] [] [operator] Dați-mi vă rog formularul. Vreau să îl văd mai întâi.
+30.290431	40.692971	[D] [voci] [operator] Aaaa.... L-ați completat greșit. Mnaa... Nu pot. Nu pot.... Nu pot face nimic cu acest formular. Poftiți, luați-l.
+40.692971	42.747937	[S] [] [apelant] Ok. Am completat formularul greșit.
+42.747937	48.332336	[N] [voci] [operator] Domnule din păcate nu vă pot ajuta. Este necesar să completați un nou formular și să vă așezați din nou la rând.
+48.332336	55.426032	[I] [] [apelant] Doamnă am făcut exact ce mi-au spus la celelalte ghișee. Pur și simplu am urmat pașii indicați de colegii dumneavoastră.
+55.542132	60.360272	[A] [] [apelant] Aștept la rând de mai bine de o oră. Sunt trimis de la o coadă la alta. De fiecare data o iau de la capăt...
+60.418322	62.937687	[N] [] [operator] Domnule, din păcate nu vă pot ajuta, înțelegeți?
+62.937687	66.873469	[N] [] [apelant] Doamnă sunt o persoană ocupată. Am multe treburi de rezolvat, drumuri de făcut...
+66.873469	70.542222	[N] [voci fundal] [apelant] Puteți găsi totuși o soluție pentru solicitarea mea, vă rog?
+70.008163	76.776780	[D] [voci fundal] [operator] Și eu sunt o persoană ocupată domnule. Și am ajuns să.... am ajuns să lucrez în această instituție de dimineață până seara.
+76.776780	82.349569	[N] [] [operator] Prin urmare ceea ce trebuie să faceți este să completați corect!... acest formular și să vă așteptați rândul.
+82.465669	95.190204	[A] [zgomot fundal] [apelant] Doamnă eu am făcut tot ce mi-au spus coegii dumneavoastră să fac. Chiar nu înțeleg de ce nu mă puteți ajuta. Doar e... foarte simplu, nu? Am nevoie de un nou permis. Atâta tot. Mă puteți ajuta să îl obțin, vă rog?
+95.190204	100.879093	[N] [zgomot fundal] [operator] Nu am cum să vă ajut, înțelegeți? Ceea ce vreau să faceți acum este să stați din nou la coadă.
+100.879093	103.700317	[I] [zgomot] [apelant] Doamnă dar am făcut asta de cinci ori până acum.
+103.700317	108.541678	[I] [zgomot] [operator] Completați vă rog acest formular și așteptați domnule. Va trebui să reveniți.
+108.541678	111.862132	[N] [zgomot] [apelant] Ok. De ce e greșit formularul de trebuie să o iau de la capăt?
+111.920181	115.646984	[N] [zgomot, voci fundal] [operator] N-ați semnat această sectiune... Vedeți? Și ați completat....
+115.147755	120.267755	[N] [voci fundal] [apelant] Ok. Bine, bine... Pot remedia formularul chiar acum, chiar aici fără să stau din nou la rând...
+120.534785	123.739138	[B] [] [apelant] Uitați am semnat toate câmpurile... totul e gata.... Poftiți...
+123.797188	128.267029	[D] [] [operator] Domnule sunt atâtea persoane care așteaptă la rând în clipa asta... Coada s-a îngroșat!
+128.267029	131.715193	[I] [] [apelant] Eu nu o iau de la capăt, doamnă. Deci aștept aici de mai bine de o oră.
+131.947392	136.057324	[D] [voci fundal] [operator] Aaa.. v-ați ortografiat până și numele greșit. E necesar să refaceți formularul.
+135.755465	141.165714	[A] [voci fundal] [apelant] Nu o iau de la capăt! Deci nu! Chiar nu, nu nu.. nu. Am făcut asta de cinci ori. Eu nu o mai iau de la capăt!
+141.165714	144.741587	[I] [] [operator] Puteți arunca formularul completat. Vă recomand să completați un altul.
+144.741587	145.252426	[S] [] [apelant] Doamnă....
+146.018685	149.838367	[S] [] [apelant] Doamnă, uitați-vă la mine doamnă... Doamnă chiar nu mă puteți ajuta?
+150.035737	152.624762	[N] [voci fundal] [operator] Nu vă pot ajuta acum. Înțelegeți?
+152.427392	158.754830	[S] [voci fundal] [operator] Doamnă uitați: persoana din spatele meu e foarte amabilă. Nu cred că o deranjează dacă așteaptă... câteva minute.
+158.812880	164.699138	[D] [] [apelant] Am stat la rând toată ziua. Trebuie să mă întorc la serviciu, să iau copii de la școală... Nu mai pot să stau aici.
+164.780408	173.603991	[N] [voci fundal] [operator] Îmi pare rău. Va trebui să închid și ghișeul. Știți ce? Sunt în pauza de prânz. Prin urmare, va trebui să reveniți cu formularul după ce veți fi stat din nou la rând.
+173.069932	176.831565	[I] [voci fundal] [apelant] Nu! Deci nu nu. În niciun caz! Doamnă trebuie să mă ajutați.
+176.831565	178.410522	[A] [] [operator] V-am spus doar ce aveți de făcut!
+178.410522	187.419864	[A] [] [apelant] Doamnă, faceți-vă treaba doamnă! Este atribuția dumneavostră să ajutați cetățenii care au nevoie de un nou permis! Aceasta este practic misiunea dumneavoastră!
+187.419864	190.032109	[I] [voci fundal] [operator] Domnule, îmi puneți răbdarea la încercare. Mă înțelegeți?
+189.811519	192.586304	[A] [voci fundal] [apelant] Eu?! Eu vă pun răbdarea la încercare?
+192.632744	196.661406	[D] [voci fundal] [operator] M-am săturat să tot lucrez fără întrerupere în clădirea asta de azi dimineață, bine?
+196.301497	208.468753	[A] [voci fundal] [apelant] Da! Ați avut o zi de lucru intensă... da! Și eu am doamnă și alte lucruri de făcut! Înregistrați vă rog formularul ăsta, fotografiați-mă și eliberați-mi permisul ca să plec dracului de aici!
+208.445533	210.848798	[A] [] [operator] Am plecat, gata, de acum. Ăăă.. nu mai sunt aici.
