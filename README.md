@@ -1,4 +1,4 @@
-# Detectia de emotie din voce in limba romana
+# Detectia multimodala a emotiilor din voce in limba romana
 Acesta este un repository pentru detectia de emotie din voce in limba romana  
 Forma adnotarilor: [eticheta emotie] [etichete fundal] [eticheta personaj] text  
 Eticheta emotie poate avea urmatoarele valori:  
