@@ -38,3 +38,5 @@ Pentru cel cu extensia .wav se poate vedea in poza cum se face, iar in cel .txt 
 **Atentie! Fisierul .wav trebuie sa aiba aceeasi denumire ca cel .txt**  
 *Exemplu: FILENAME.wav FILENAME.txt*  
 ![image](https://user-images.githubusercontent.com/31506258/213907164-4a83bfda-501a-4851-9d4d-7d684f37fdb3.png)  
+
+Pentru a putea folosi aceasta aplicatie aveti nevoie de cateva pachete instalate. Daca nu le aveti, puteti rula comanda ```pip install pandas scikit-learn scipy matplotlib numpy pandas soundfile tabulate pydub ipython sounddevice keyboard wave``` sau daca aveti anaconda, rulati comanda ```conda install pandas scikit-learn scipy matplotlib numpy pandas soundfile tabulate pydub ipython sounddevice keyboard wave```
