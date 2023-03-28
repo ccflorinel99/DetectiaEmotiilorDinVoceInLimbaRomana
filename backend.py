@@ -354,7 +354,6 @@ class Models:
         self.MLPClassifierModel = MLPClassifier(max_iter=5000)
 # dadea o eroare ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.
 # rezolvare: https://www.google.com/search?q=ConvergenceWarning%3A+Stochastic+Optimizer%3A+Maximum+iterations+(200)+reached+and+the+optimization+hasn%27t+converged+yet.&rlz=1C1CHBF_enRO857RO857&oq=ConvergenceWarning%3A+Stochastic+Optimizer%3A+Maximum+iterations+(200)+reached+and+the+optimization+hasn%27t+converged+yet.&aqs=chrome..69i57j69i58.721j0j1&sourceid=chrome&ie=UTF-8
-        self.predictii = [] # aici voi stoca predictiile
         self.files = Files()
 
     def save_models(self):
@@ -503,6 +502,7 @@ class Models:
 
     def use_models(self, audio_filename, p : Preprocessing):
         audio, sr = self.am.load(audio_filename)
+        self.predictii = [] # aici voi stoca predictiile
 
         # extrageti caracteristicile fisierului audio
         X = p.extract_features(audio, sr).reshape(-1, 1)
@@ -539,28 +539,39 @@ class Models:
         
         
     def predictie(self):
-        count = 0
-        count2 = 0
-        emotie = ""
-        em2 = ""
+        counts = [] # unde pun fiecare de cate ori apare
+        em = [] #unde o sa pun emotiile
+    
         for key in self.emotions.d:
-            c = self.predictii.count(self.emotions.d[key])
-            if c > count:
-                count = c
-                emotie = self.emotions.d[key]
-                
-        # verific sa nu fie 2 cu o parere si 2 cu alta, iar al 5-lea model sa fii ales altceva
-        for key in self.emotions.d:
-            c = self.predictii.count(self.emotions.d[key])
-            em = self.emotions.d[key]
-            if c > count2 and emotie != em:
-                count2 = c
-                em2 = self.emotions.d[key]
-                
-        if count == count2: # se intampla sa am cazul emotie_1 emotie_2 emotie_3, unde emotie_1 si emotie_2 au fost alese de 2 modele fiecare
-            emotie = emotie + "/" + em2
+            emotie = self.emotions.d[key]
+            count = 0
+            for i in range(len(self.predictii)):
+                if self.predictii[i] == emotie:
+                    count += 1
             
-        return emotie
+            counts.append(count)
+            em.append(emotie)
+        
+        maxim = 0
+        minim = 0
+        e = "" # emotia finala
+    
+        for i in range(len(counts)):
+            if counts[i] == minim:
+                pass
+            elif counts[i] > maxim:
+                maxim = counts[i]
+        
+        ctr = 0 # pt egale
+        for i in range(len(counts)):
+            if counts[i] == maxim:
+                ctr += 1
+                if e == "":
+                    e = self.emotions.d[i]
+                else:
+                    e = e + "/" + self.emotions.d[i]
+                
+        return e
 
 class Record:
 # pe google colab nu va merge PortAudioError: Error querying device -1
