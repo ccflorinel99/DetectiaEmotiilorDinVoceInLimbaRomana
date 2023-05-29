@@ -1,7 +1,7 @@
-# Detectia multimodala a emotiilor din voce in limba romana
-Acesta este un repository pentru detectia de emotie din voce in limba romana  
-Forma adnotarilor: [eticheta emotie] [etichete fundal] [eticheta personaj] text  
-Eticheta emotie poate avea urmatoarele valori:  
+# Detecția multimodală a emoțiilor din voce în limba română
+Acesta este un repository pentru detecția de emoții din voce în limba română  
+Forma adnotarilor: [eticheta emoție] [etichete fundal] [eticheta personaj] text  
+Eticheta emoție poate avea următoarele valori:  
  -> A = anger  
  -> B = boredeom  
  -> D = disgust  
@@ -10,33 +10,36 @@ Eticheta emotie poate avea urmatoarele valori:
  -> I = irritation or nervousness  
  -> N = neutral  
  -> S = sadness  
-Eticheta fundal poate avea urmatoarele valori:  
+Eticheta fundal poate avea următoarele valori:  
  -> zgomot - pt zona de zgomot  
  -> zgomot fundal - pt zgomotul de fundal  
- -> voci - pt voci nedeslusite  
+ -> voci - pt voci nedeslușite  
  -> voci fundal - pentru vocile care se aud pe fundal  
- -> tipete fundal - pentru vocile de pe fundal care dau impresia de spaima, frica  
- -> muzica - pt zona de muzica  
- -> muzica fundal - pt muzica care se aude pe fundal  
-Eticheta personaj poate avea urmatoarele valori:  
- -> apelant - cel care suna la 112  
- -> operator - cel care raspunde la telefon  
- -> voci - cel care se aude nu este niciunul dintre cele doua personaje  
-Text - zona de text reprezentand ceea ce zice personajul  
+ -> tipete fundal - pentru vocile de pe fundal care dau impresia de spaimă, frică  
+ -> muzica - pt zona de muzică  
+ -> muzica fundal - pt muzică care se aude pe fundal  
+Eticheta personaj poate avea următoarele valori:  
+ -> apelant - cel care sună la 112  
+ -> operator - cel care raspunde la telefon (operatorul de la 112)  
+ -> voci - cel care se aude nu este niciunul dintre cele două personaje  
+Text - zona de text reprezentând ceea ce zice personajul  
 
 # Modele folosite  
+Versiunea 1:  
 RandomForestClassifier  
 SVC  
 LogisticRegression  
 DecisionTreeClassifier  
 MLPClassifier  
+Versiunea 2:  
+VGG16, având ultimul layer înlocuit de mine (vezi în cod)  
 
 # Pentru antrenarea modelelor  
-Este necesar sa aveti audacity instalat pe laptop/pc, dupa care va trebui sa adnotati fisierul audio (de oricare tip ar fi el si e suportat de audacity) in functie de cine ce vorbeste si sa urmariti etichetele de mai sus.  
-La finalul adnorarii, va trebui sa urmati pasii din poza de mai jos si sa exportati 2 tipuri de fisiere din acelasi proiect audacity (odata incarcat un fisier, dati save, salvati-l undeva si va avea extensia .aup3 care va fi considerat proiect de catre audacity): unul .wav si altul .txt  
-Pentru cel cu extensia .wav se poate vedea in poza cum se face, iar in cel .txt se vor afla adnotarile, astfel ca va trebui aleasa optiunea "Export Labels"  
-**Atentie! Fisierul .wav trebuie sa aiba aceeasi denumire ca cel .txt**  
+Este necesar să aveți audacity instalat pe laptop/pc, după care va trebui să adnotați fișierul audio (de oricare tip ar fi el și e suportat de audacity) în funcție de cine ce vorbește și să aveți în vedere ca etichetărilea realizate de dumneavoastră să fie conform specificațiilor de mai sus.  
+La finalul adnotării, va trebui să urmati pașii din poza de mai jos și sa exportați 2 tipuri de fișiere din același proiect audacity (odată încărcat un fișier, dați save, salvați-l undeva și va avea extensia .aup3 care va fi considerat proiect de către audacity): unul .wav și altul .txt.  
+Pentru cel cu extensia .wav se poate vedea în poză cum se face, iar în cel .txt se vor afla adnotările, astfel că va trebui aleasă opțiunea "Export Labels".  
+**Atentie! Fișierul .wav trebuie să aibă aceeași denumire ca cel .txt**  
 *Exemplu: FILENAME.wav FILENAME.txt*  
 ![image](https://user-images.githubusercontent.com/31506258/213907164-4a83bfda-501a-4851-9d4d-7d684f37fdb3.png)  
 
-Pentru a putea folosi aceasta aplicatie aveti nevoie de cateva pachete instalate. Daca nu le aveti, puteti rula comanda ```pip install pandas scikit-learn scipy matplotlib numpy pandas soundfile tabulate pydub ipython sounddevice keyboard wave pysimplegui``` sau daca aveti anaconda, rulati comanda ```conda install pandas scikit-learn scipy matplotlib numpy pandas soundfile tabulate pydub ipython sounddevice keyboard wave pysimplegui```
+Pentru a putea folosi această aplicație aveți nevoie de câteva pachete instalate. Dacă nu le aveți, puteți rula comanda ```pip install numpy pandas scikit-learn pydub soundfile sounddevice scipy opencv-python tensorflow matplotlib librosa keyboard wave pysimplegui``` sau dacă aveți anaconda, rulați comanda ```conda install numpy pandas scikit-learn pydub soundfile sounddevice scipy opencv-python tensorflow matplotlib librosa keyboard wave pysimplegui```
