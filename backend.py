@@ -80,7 +80,7 @@ class Error():
             self.msg = self.msg + "\n" + msg
   
     def path_not_found(self, path):
-        self.add_error(f"{path} nu exista")
+        self.add_error(f"{path} nu există")
 
     def got_error(self):
         if self.msg == "":
@@ -124,8 +124,8 @@ class Emotions:
                 return self.d[key]
             
         if not found:
-            err.add_error(f"Emotia prezisa nu se afla in dictionar, aceasta avand codul {code}")
-
+            err.add_error(f"Emoția prezisă nu se află în dicționar, aceasta având codul {code}")
+            
 class AudioManipulation:
     def __init__(self):
         self.files = Files()
@@ -221,7 +221,7 @@ class Preprocessing():
 
     def preprocess_audio_file(self, audio_file, txt_file):
         if err.got_error():
-            out.add("Ai de rezolvat una sau mai multe erori inainte de a lucra cu functia preprocess_audio_file")
+            out.add("Ai de rezolvat una sau mai multe erori înainte de a lucra cu funcția preprocess_audio_file")
             return [0], 0
         else: 
       # incarcam fisierul audio
@@ -248,7 +248,7 @@ class Preprocessing():
 
     def extract_features(self, audio, sr):
         if err.got_error():
-            out.add("Ai de rezolvat una sau mai multe erori inainte de a lucra cu functia extract_features")
+            out.add("Ai de rezolvat una sau mai multe erori înainte de a lucra cu funcția extract_features")
             return [0, 0, 0, 0, 0, 0]
         else: 
             # transformare din pydub audiosegment in numpy array
@@ -295,14 +295,14 @@ class Preprocessing():
             for i in range(count):
                 suma = suma + a[i]
                 
-            a = [suma/count]
+            a = suma/count
             a = np.array(a)
             return a
 
   
     def preprocesare(self):
         if err.got_error():
-            out.add("Ai de rezolvat una sau mai multe erori inainte de a lucra cu functia preprocesare")
+            out.add("Ai de rezolvat una sau mai multe erori înainte de a lucra cu funcția preprocesare")
             return 0, 0
         else: 
             # obtinem listele audio_files si txt_files
@@ -327,19 +327,17 @@ class Preprocessing():
                     features = self.extract_features(audio[j], sr)
                     X = np.append(X, features)
 
-            out.add(f"{txt_files[i]}, X = {X}")
+            X = X.reshape(-1, 1)
+            out.add(f"{txt_files[i]}, X.shape = {X.shape}")
+            
     
             # transformam etichetele de emotie in forma utilizabila de model
             le = LabelEncoder()
             y = le.fit_transform(labels)
-            out.add(f"y = {y}")
+            out.add(f"y.shape = {y.shape}")
 
-            # Elimină lista suplimentară din interiorul lui np.array() atunci când se definește X
-            X = np.resize(X, (y.shape[0], 1))
-      
             return X, y
-
-
+        
 class Models:
     def __init__(self):
         self.am = AudioManipulation()
@@ -351,14 +349,12 @@ class Models:
 # daca lasam default (max_iter=100 default) sau max_iter=500, atunci imi dadea eroarea STOP: TOTAL NO. of ITERATIONS REACHED LIMIT.
 # discutie: https://stackoverflow.com/questions/62658215/convergencewarning-lbfgs-failed-to-converge-status-1-stop-total-no-of-iter
         self.DecisionTreeClassifierModel = DecisionTreeClassifier()
-        self.MLPClassifierModel = MLPClassifier(max_iter=5000)
-# dadea o eroare ConvergenceWarning: Stochastic Optimizer: Maximum iterations (200) reached and the optimization hasn't converged yet.
-# rezolvare: https://www.google.com/search?q=ConvergenceWarning%3A+Stochastic+Optimizer%3A+Maximum+iterations+(200)+reached+and+the+optimization+hasn%27t+converged+yet.&rlz=1C1CHBF_enRO857RO857&oq=ConvergenceWarning%3A+Stochastic+Optimizer%3A+Maximum+iterations+(200)+reached+and+the+optimization+hasn%27t+converged+yet.&aqs=chrome..69i57j69i58.721j0j1&sourceid=chrome&ie=UTF-8
+        self.MLPClassifierModel = MLPClassifier()
         self.files = Files()
 
     def save_models(self):
         if err.got_error():
-            out.add("Ai de rezolvat una sau mai multe erori inainte de a salva modelele")
+            out.add("Ai de rezolvat una sau mai multe erori înainte de a salva modelele")
         else:
             if not self.files.path_exists("models"):
                 os.makedirs("models")
@@ -390,52 +386,52 @@ class Models:
 
     def load_models(self):
         if not self.files.path_exists("models"):
-            err.add_error("Folderul 'models' nu exista, rezulta faptul ca va trebui sa antrenezi intai modelele")
+            err.add_error("Folderul 'models' nu există, rezultă faptul că va trebui să antrenezi întâi modelele")
         else:
             count = 0
             if not self.files.path_exists("models/RandomForestClassifierModel.pkl"):
-                err.add_error("Fisierul 'models/RandomForestClassifierModel.pkl' nu exista")
+                err.add_error("Fișierul 'models/RandomForestClassifierModel.pkl' nu există")
                 count = count + 1
             if not self.files.path_exists("models/SVCModel.pkl"):
-                err.add_error("Fisierul 'models/SVCModel.pkl' nu exista")
+                err.add_error("Fișierul 'models/SVCModel.pkl' nu exista")
                 count = count + 1
             if not self.files.path_exists("models/LogisticRegressionModel.pkl"):
-                err.add_error("Fisierul 'models/LogisticRegressionModel.pkl' nu exista")
+                err.add_error("Fișierul 'models/LogisticRegressionModel.pkl' nu există")
                 count = count + 1
             if not self.files.path_exists("models/DecisionTreeClassifierModel.pkl"):
-                err.add_error("Fisierul 'models/DecisionTreeClassifierModel.pkl' nu exista")
+                err.add_error("Fișierul 'models/DecisionTreeClassifierModel.pkl' nu există")
                 count = count + 1
             if not self.files.path_exists("models/MLPClassifierModel.pkl"):
-                err.add_error("Fisierul 'models/MLPClassifierModel.pkl' nu exista")
+                err.add_error("Fișierul 'models/MLPClassifierModel.pkl' nu există")
                 count = count + 1
                 
             if count == 5: # daca nu exista niciun model
-                err.add_error("Nu am gasit niciun model, asa ca va trebui sa antrenezi modelele")
+                err.add_error("Nu am găsit niciun model, așa că va trebui să antrenezi modelele")
                 
         if not err.got_error():
             with open("models/RandomForestClassifierModel.pkl", "rb") as f:
                 self.RandomForestClassifierModel = pickle.load(f)
-            out.add("models/RandomForestClassifierModel a fost incarcat")
+            out.add("models/RandomForestClassifierModel a fost încărcat")
 
             with open("models/SVCModel.pkl", "rb") as f:
                 self.SVCModel = pickle.load(f)
-            out.add("models/SVCModel a fost incarcat")
+            out.add("models/SVCModel a fost încărcat")
 
             with open("models/LogisticRegressionModel.pkl", "rb") as f:
                 self.LogisticRegressionModel = pickle.load(f)
-            out.add("models/LogisticRegressionModel a fost incarcat")
+            out.add("models/LogisticRegressionModel a fost încărcat")
 
             with open("models/DecisionTreeClassifierModel.pkl", "rb") as f:
                 self.DecisionTreeClassifierModel = pickle.load(f)
-            out.add("models/DecisionTreeClassifierModel a fost incarcat")
+            out.add("models/DecisionTreeClassifierModel a fost încărcat")
 
             with open("models/MLPClassifierModel.pkl", "rb") as f:
                 self.MLPClassifierModel = pickle.load(f)
-            out.add("models/MLPClassifierModel a fost incarcat")
+            out.add("models/MLPClassifierModel a fost încărcat")
 
     def train(self, x, y):
         if err.got_error():
-            out.add("Nu poti antrena modelele daca ai erori")
+            out.add("Nu poți antrena modelele dacă ai erori")
         elif x.size == 0 and y.size == 0:
             err.add_error("Nu s-a realizat preprocesarea")
         else:
@@ -476,11 +472,6 @@ class Models:
             self.accuracy_DecisionTreeClassifier = self.accuracy_score(self.y_test, self.y_pred_DecisionTreeClassifier)
             self.accuracy_MLPClassifier = self.accuracy_score(self.y_test, self.y_pred_MLPClassifier)
 
-            out.add(f'Acuratetea modelului RandomForestClassifier este: {self.accuracy_RandomForestClassifier:.2f}')
-            out.add(f'Acuratetea modelului SVC este: {self.accuracy_SVC:.2f}')
-            out.add(f'Acuratetea modelului LogisticRegression este: {self.accuracy_LogisticRegression:.2f}')
-            out.add(f'Acuratetea modelului DecisionTreeClassifier este: {self.accuracy_DecisionTreeClassifier:.2f}')
-            out.add(f'Acuratetea modelului MLPClassifier este: {self.accuracy_MLPClassifier:.2f}')
 
     def create_table(self):
         from tabulate import tabulate
@@ -501,11 +492,11 @@ class Models:
 
 
     def use_models(self, audio_filename, p : Preprocessing):
-        audio, sr = self.am.load(audio_filename)
         self.predictii = [] # aici voi stoca predictiile
+        audio, sr = self.am.load(audio_filename)
 
         # extrageti caracteristicile fisierului audio
-        X = p.extract_features(audio, sr).reshape(-1, 1)
+        X = np.array(p.extract_features(audio, sr)).reshape(-1, 1)
         
         # folositi modelele pentru a face predictia
         self.prediction_RandomForestClassifierModel = self.RandomForestClassifierModel.predict(X)
@@ -517,8 +508,8 @@ class Models:
         # transformati rezultatul predictiei in eticheta de emotie
         label_encoder = LabelEncoder()
         emotion_labels = label_encoder.fit_transform(self.emotions.to_list())
-        out.add(f"Codificari: {emotion_labels}")
-        out.add(f"Emotii: {self.emotions.to_list()}")
+        out.add(f"Codificări: {emotion_labels}")
+        out.add(f"Emoții: {self.emotions.to_list()}")
         self.emotion_RandomForestClassifierModel = self.emotions.get_emotion(emotion_labels[self.prediction_RandomForestClassifierModel[0]])
         self.emotion_SVCModel = self.emotions.get_emotion(emotion_labels[self.prediction_SVCModel[0]])
         self.emotion_LogisticRegressionModel = self.emotions.get_emotion(emotion_labels[self.prediction_LogisticRegressionModel[0]])
@@ -530,12 +521,12 @@ class Models:
         self.predictii.append(self.emotion_DecisionTreeClassifierModel)
         self.predictii.append(self.emotion_MLPClassifierModel)
         
-        out.add(f"Predictia lui RandomForestClassifierModel este {self.emotion_RandomForestClassifierModel} ({emotion_labels[self.prediction_RandomForestClassifierModel[0]]})")
-        out.add(f"Predictia lui SVCModel este {self.emotion_SVCModel} ({emotion_labels[self.prediction_SVCModel[0]]})")
-        out.add(f"Predictia lui LogisticRegressionModel este {self.emotion_LogisticRegressionModel} ({emotion_labels[self.prediction_LogisticRegressionModel[0]]})")
-        out.add(f"Predictia lui DecisionTreeClassifierModel este {self.emotion_DecisionTreeClassifierModel} ({emotion_labels[self.prediction_DecisionTreeClassifierModel[0]]})")
-        out.add(f"Predictia lui MLPClassifierModel este {self.emotion_MLPClassifierModel} ({emotion_labels[self.prediction_MLPClassifierModel[0]]})")
-        out.add(f"Decizia finala este {self.predictie()}")
+        out.add(f"RandomForestClassifierModel: {self.emotion_RandomForestClassifierModel}")
+        out.add(f"SVCModel: {self.emotion_SVCModel}")
+        out.add(f"LogisticRegressionModel: {self.emotion_LogisticRegressionModel}")
+        out.add(f"DecisionTreeClassifierModel: {self.emotion_DecisionTreeClassifierModel}")
+        out.add(f"MLPClassifierModel: {self.emotion_MLPClassifierModel}")
+        out.add(f"Decizia finală: {self.predictie()}")
         
         
     def predictie(self):
@@ -576,11 +567,11 @@ class Models:
 class Record:
 # pe google colab nu va merge PortAudioError: Error querying device -1
 # nu exista un device de inregistrare
-    def __init__(self, filename):
+    def __init__(self, filename, out):
         fs = 44100  # frecventa de esantionare
         max_seconds = 180  # durata maxima inregistrarii scrisa in secunde (180s = 3m)
     
-        print("Spune ceva. Apasa 'q' pentru a opri inregistrarea (inregistrarea dureaza maxim 3 minute)")
+        print("Spune ceva. Apasă 'q' pentru a opri înregistrarea (înregistrarea durează maxim 3 minute)")
         recording = sd.rec(int(max_seconds * fs), samplerate=fs, channels=1)
 
         start_time = time.time()
@@ -597,9 +588,8 @@ class Record:
         time.sleep(1)
 
         sf.write(filename, recording, fs)  # Save as WAV file 
-        print("Inregistrarea a fost salvata")
-
-
+        out.add("Înregistrarea a fost salvată")
+        
 class App:
     def __init__(self):
         self.version_error = False
@@ -611,7 +601,9 @@ class App:
         self.files = Files()
         self.recorded_filename = "output.wav"
         if sys.version_info < (3, 6):
-            err.add_error("Trebuie sa ai minim python 3.6 inainte sa poti rula aceasta aplicatie")
+            err.add_error("Trebuie să ai minim python 3.6 înainte de a rula această aplicație")
+        if sys.version_info >= (3, 10):
+            err.add_error("Trebuie să ai sub python 3.10 înainte de a rula această aplicație. Sugerez versiunea 3.9.13")
 # Cele mai multe dintre librariile folosite de mine sunt compatibile cu Python 3.x, cu unele necesitand versiunea 3.6 sau 3.7
 # Sounddevice, de exemplu, necesită Python 3.6 sau mai recent, iar soundfile necesită Python 3.5 sau mai recent
 # Asa ca, pentru ca cineva sa poata rula aplicatia mea, trebuie sa aiba cel putin Python 3.6 instalat
@@ -634,7 +626,7 @@ class App:
 
     def save_models(self):
         if not self.trained_models:
-            err.add_error("Nu poti salva modelele daca nu au fost antrenate")
+            err.add_error("Nu poți salva modelele dacă nu au fost antrenate")
         else:
             self.m.save_models()
 
@@ -646,7 +638,7 @@ class App:
     def use(self, audio_filename):
         if not err.got_error():
             if not self.trained_models and not self.loaded_models:
-                err.add_error("Nu poti folosi modelele daca nu au fost antrenate sau incarcate de undeva")
+                err.add_error("Nu poți folosi modelele dacă nu au fost antrenate sau încărcate de undeva")
             else:
                 self.p = Preprocessing()
                 self.m.use_models(audio_filename, self.p)
@@ -672,12 +664,12 @@ class App:
             elif choice == "folosire":
                 self.load_models()
                 if not self.trained_models and not self.loaded_models:
-                    err.add_error("Nu poti folosi modelele daca nu au fost antrenate sau incarcate inainte")
+                    err.add_error("Nu poți folosi modelele dacă nu au fost antrenate sau încărcate înainte")
                 else:
-                    r = Record(self.recorded_filename)
+                    r = Record(self.recorded_filename, out)
                     self.use(self.recorded_filename)
             else:
-                err.add_error("Alegere neidentificata")
+                err.add_error("Alegere neidentificată")
 
 
 # forma adnotarilor: [eticheta emotie] [etichete fundal] [eticheta personaj] text
@@ -714,7 +706,7 @@ while not done:
     alegere = ""
     if choice == 1:
         alegere = "antrenare"
-        print("Pentru a realiza antrenarea modelelor, trebuie sa selectezi folderul unde ai fisierele text si wav pentru antrenare")
+        print("Pentru a realiza antrenarea modelelor, trebuie să selectezi folderul unde ai fițierele text ți wav pentru antrenare")
     elif choice == 2:
         alegere = "folosire"
         print("Modelele se vor salva in folderul models")
@@ -725,5 +717,4 @@ while not done:
         app.start(alegere)
         app.show_output()
     
-print("Am terminat de rulat aplicatia")
-
+print("Am terminat de rulat aplicația")
