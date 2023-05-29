@@ -37,6 +37,7 @@ from tkinter import filedialog
 import keyboard
 import time
 from pydub import AudioSegment
+import librosa
 
 class Files:
     def __init__(self):
@@ -133,7 +134,7 @@ class AudioManipulation:
     def load(self, file_path):
         if self.files.path_exists(file_path):
             audio = AudioSegment.from_wav(file_path)
-              # sr = sample rate
+            # sr = sample rate
             _ , sr = sf.read(file_path)  
             return audio, sr
 # Sample rate, sau "rata de eșantionare", reprezintă numărul de eșantioane de semnal luate pe secundă.
@@ -144,61 +145,31 @@ class AudioManipulation:
 # Rata standard pentru aplicațiile audio digitale este de 44.1 sau 48 kHz.
         else:
             err.path_not_found(file_path)
-
-# STFT (Short-Time Fourier Transform) este o metodă utilizată pentru a analiza un semnal în timp și frecvență. Aceasta se face prin împărțirea semnalului în fragmente scurte de durată (numite "ferestre") și aplicarea unei transformări Fourier pe fiecare fragment. Aceasta permite analizarea semnalului în timp și frecvență simultan.
-# In acest caz, se utilizeaza functia numpy hanning pentru a obtine fereastra hanning si se prelungește audio cu câteva esantioane pentru a evita pierderea acestora la tăiere. Apoi, se utilizeaza functia fft din numpy pentru a efectua transformata Fourier rapida, si se returneaza spectrograma absoluta.
-    def stft(self, audio, window_size=2048):
-        audio_len = len(audio)
-        window = np.hanning(window_size)
-# https://en.wikipedia.org/wiki/Hann_function
-# Operatorul // este operatorul de diviziune care returneaza catul diviziei, eliminand partea fractionara.
-        audio = np.pad(audio, (window_size//2, window_size//2), mode='reflect')
-        num_segments = (audio_len + window_size - 1) // window_size
-        segments = np.zeros((num_segments, window_size))
-# Fereastra este o functie matematica care se aplica peste segmentul audio si are rolul de a reduce artefactele care apar in urma taierii audio-ului in segmente.
-# Aceasta reduce artefactele prin atenuarea (attenuation) marginilor segmentelor.
-# artefacte = distorsiuni sau abateri neintentionate in semnalul audio care apar in urma procesarii acestuia
-        for i in range(num_segments):
-            segment = audio[i*window_size:i*window_size+window_size]
-            segments[i] = segment * window
-        spectrogram = np.abs(np.fft.fft(segments, axis=1))
-# Aceasta linie de cod calculeaza spectrograma semnalului audio prin utilizarea Transformatei Fourier Rapide (FFT). Spectrograma este o reprezentare grafica a semnalului audio, care arata cum se distribuie energia in diferite frecvente de-a lungul timpului.
-# Fiecare coloana a spectrogram-ului reprezinta o transformata Fourier a unui segment din semnalul audio, iar fiecare linie reprezinta o frecventa specifica.
-# Se ia modulul FFT pentru a elimina componenta de faza.
-# Acesta este utilizat pentru a detecta si caracteriza anumite caracteristici ale sunetului cum ar fi tonalitatea sau timbrul.
-        return spectrogram
-
-    def piptrack(self, audio, sr):
-    # calculam diferenta de faza intre semnalul original si cel intarziat
-        audio_delayed = audio[1:]
-        audio_diff = audio_delayed - audio[:-1]
-        audio_diff = np.square(audio_diff)
-
-    # aplicam o fereastra de Hanning
-        window = np.hanning(len(audio_diff))
-        audio_diff = audio_diff * window
-
-    # calculam integrala spectrului
-        audio_diff = np.cumsum(audio_diff)
-
-    # determinam pitch-ul
-        pitch = 0
-        if np.argmin(audio_diff) != 0:
-            pitch = sr / np.argmin(audio_diff)
-
-        return pitch
-# Aceasta functie calculeaza rata de variatie a frecventei vorbirii (pitch) din semnalul audio.
-# Prima etapa este calcularea diferentei de faza intre semnalul original si cel intarziat.
-# Aceasta este realizata prin scaderea elementelor din semnalul original cu elementele din semnalul intarziat.
-# Urmatorul pas este ridicarea la patrat a diferentei de faza pentru a elimina valorile negative.
-# Apoi se aplica o fereastra de Hanning pentru a reduce artefactele.
-# Se calculeaza integrala spectrului, care este utilizata pentru a determina pozitia minimului, care este inversul frecventei.
-# Rata de variatie a frecventei vorbirii (pitch) este obtinuta prin impartirea frecventei de esantionare la pozitia minimului.
-
+            
 class Preprocessing():
     def __init__(self):
         self.files = Files()
         self.am = AudioManipulation()
+        self.emodb = "C:/Users/User/Desktop/Licenta/emodb/wav"
+        
+    def get_emotion_emodb(self, file):
+        em = file[5:(-1)*len(".wav")]
+        if em[0] == 'W':
+            em = 'A'
+        elif em[0] == 'L':
+            em = 'B'
+        elif em[0] == 'E':
+            em = 'D'
+        elif em[0] == 'A':
+            em = 'F'
+        elif em[0] == 'F':
+            em = 'H'
+        elif em[0] == 'T':
+            em = 'S'
+        elif em[0] == 'N':
+            em = 'N'
+        
+        return em
         
     def pereche_wav_txt(self, dir : str):
         self.dir = dir
@@ -208,16 +179,24 @@ class Preprocessing():
       # listam fisierele din directorul dat ca parametru
             filenames = os.listdir(self.dir)
 
-      # cream lista de tupluri formata din numele fisierelor audio si numele fisierelor txt asociate
-            self.audio_txt_pairs = []
-            for filename in filenames:
-                if filename.endswith('.wav'):
-                    txt_filename = filename.replace('.wav', '.txt')
-                    full_path = os.path.join(self.dir, txt_filename)
-                    if self.files.path_exists(full_path):
-                        self.audio_txt_pairs.append((os.path.join(self.dir, filename), os.path.join(self.dir, txt_filename)))
-                    else:
-                        err.path_not_found(full_path)
+            if self.emodb == self.dir: # daca fac antrenare pe fisierele de pe emodb
+                self.audio_emotion_pair = []
+                for filename in filenames:
+                    em = self.get_emotion_emodb(filename)
+                    full_path = os.path.join(self.dir, filename)
+                    lista = [full_path, em]
+                    self.audio_emotion_pair.append(lista)
+            else:
+                # cream lista de tupluri formata din numele fisierelor audio si numele fisierelor txt asociate
+                self.audio_txt_pairs = []
+                for filename in filenames:
+                    if filename.endswith('.wav'):
+                        txt_filename = filename.replace('.wav', '.txt')
+                        full_path = os.path.join(self.dir, txt_filename)
+                        if self.files.path_exists(full_path):
+                            self.audio_txt_pairs.append((os.path.join(self.dir, filename), os.path.join(self.dir, txt_filename)))
+                        else:
+                            err.path_not_found(full_path)
 
     def preprocess_audio_file(self, audio_file, txt_file):
         if err.got_error():
@@ -226,25 +205,27 @@ class Preprocessing():
         else: 
       # incarcam fisierul audio
             audio, sr = self.am.load(audio_file)
-            audios = []
-    
-            if(self.files.path_exists(txt_file)):
-                with open(txt_file, 'r') as f:
-                    lines = f.readlines()
-                    out.add(f"txt file: {txt_file}, nr linii: {len(lines)}")
-                    # impartim fisierul audio in fragmente
-                    for line in lines:
-                        start = float(line[:line.find("[")].split(' ')[0].split('\t')[0])
-                        end = float(line[:line.find("[")].split(' ')[0].split('\t')[1])
-                        fragment_audio = audio[start:end]
-                        out.add(f"range {start} - {end}")
-                        # adaugam fragmentul audio la lista de fragmente
-                        audios.append(fragment_audio)
-                    f.close()
+            
+            if self.emodb == self.dir: # daca fac antrenare pe fisierele de pe emodb
+                return audio, sr
             else:
-                err.path_not_found(txt_file)
+                audios = []
     
-        return audios, sr
+                if(self.files.path_exists(txt_file)):
+                    with open(txt_file, 'r') as f:
+                        lines = f.readlines()
+                        # impartim fisierul audio in fragmente
+                        for line in lines:
+                            start = float(line[:line.find("[")].split(' ')[0].split('\t')[0])
+                            end = float(line[:line.find("[")].split(' ')[0].split('\t')[1])
+                            fragment_audio = audio[start:end]
+                            # adaugam fragmentul audio la lista de fragmente
+                            audios.append(fragment_audio)
+                        f.close()
+                else:
+                    err.path_not_found(txt_file)
+    
+            return audios, sr
 
     def extract_features(self, audio, sr):
         if err.got_error():
@@ -257,10 +238,10 @@ class Preprocessing():
             amplitudes = np.abs(audio)
 
             # calculam spectrul de frecventa
-            spectrogram = np.abs(self.am.stft(audio))
+            spectrogram = np.abs(librosa.stft(audio))
 
             # calculam rata de variatie a frecventei vorbirii
-            pitch = self.am.piptrack(audio, sr)
+            pitch = librosa.piptrack(y=audio, sr=sr)
             pitch = np.array([pitch])
             pitch_change = np.diff(pitch)
             pitch_change_rate = 0
@@ -305,30 +286,39 @@ class Preprocessing():
             out.add("Ai de rezolvat una sau mai multe erori înainte de a lucra cu funcția preprocesare")
             return 0, 0
         else: 
-            # obtinem listele audio_files si txt_files
-            audio_files = [pair[0] for pair in self.audio_txt_pairs]
-            txt_files = [pair[1] for pair in self.audio_txt_pairs]
-
-            # citim etichetele de emotie din fisierele txt
-            labels = []
-            for txt_file in txt_files:
-                with open(txt_file, 'r') as f:
-                    lines = f.readlines()
-                    for line in lines:
-                        label = line[line.find("["):].split(' ')[0].replace("[", "").replace("]", "")
-                        labels.append(label)
-
-            # extragem caracteristicile din fisierele audio
             X = []
-
-            for i in range(len(self.audio_txt_pairs)):
-                audio, sr = self.preprocess_audio_file(audio_files[i], txt_files[i])
-                for j in range(len(audio)):
-                    features = self.extract_features(audio[j], sr)
+            labels = []
+            if self.emodb == self.dir: # daca fac antrenare pe fisierele de pe emodb
+                audio_files = [pair[0] for pair in self.audio_emotion_pair]
+                em = [pair[1] for pair in self.audio_emotion_pair]
+                for i in range(len(audio_files)):
+                    audio, sr = self.preprocess_audio_file(audio_files[i], em[i])
+                    labels.append(em[i])
+                    features = self.extract_features(audio, sr)
                     X = np.append(X, features)
+            else:
+                # obtinem listele audio_files si txt_files
+                audio_files = [pair[0] for pair in self.audio_txt_pairs]
+                txt_files = [pair[1] for pair in self.audio_txt_pairs]
+
+                # citim etichetele de emotie din fisierele txt
+                for txt_file in txt_files:
+                    with open(txt_file, 'r') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            label = line[line.find("["):].split(' ')[0].replace("[", "").replace("]", "")
+                            labels.append(label)
+
+                # extragem caracteristicile din fisierele audio
+
+                for i in range(len(self.audio_txt_pairs)):
+                    audio, sr = self.preprocess_audio_file(audio_files[i], txt_files[i])
+                    for j in range(len(audio)):
+                        features = self.extract_features(audio[j], sr)
+                        X = np.append(X, features)
 
             X = X.reshape(-1, 1)
-            out.add(f"{txt_files[i]}, X.shape = {X.shape}")
+            out.add(f"X.shape = {X.shape}")
             
     
             # transformam etichetele de emotie in forma utilizabila de model
@@ -671,7 +661,6 @@ class App:
             else:
                 err.add_error("Alegere neidentificată")
 
-
 # forma adnotarilor: [eticheta emotie] [etichete fundal] [eticheta personaj] text
 # eticheta emotie poate avea urmatoarele valori:
 #   A = anger
@@ -706,10 +695,10 @@ while not done:
     alegere = ""
     if choice == 1:
         alegere = "antrenare"
-        print("Pentru a realiza antrenarea modelelor, trebuie să selectezi folderul unde ai fițierele text ți wav pentru antrenare")
+        print("Pentru a realiza antrenarea modelelor, trebuie să selectezi folderul unde ai fișierele text și wav pentru antrenare")
     elif choice == 2:
         alegere = "folosire"
-        print("Modelele se vor salva in folderul models")
+        print("Modelele se vor salva în folderul models")
     else:
         done = True
     
