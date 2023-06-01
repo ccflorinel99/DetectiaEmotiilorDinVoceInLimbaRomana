@@ -127,6 +127,7 @@ class Emotions:
         if not found:
             err.add_error(f"Emoția prezisă nu se află în dicționar, aceasta având codul {code}")
             
+            
 class AudioManipulation:
     def __init__(self):
         self.files = Files()
@@ -212,7 +213,7 @@ class Preprocessing():
                 audios = []
     
                 if(self.files.path_exists(txt_file)):
-                    with open(txt_file, 'r') as f:
+                    with open(txt_file, 'r', encoding="utf-8") as f:
                         lines = f.readlines()
                         # impartim fisierul audio in fragmente
                         for line in lines:
@@ -303,7 +304,7 @@ class Preprocessing():
 
                 # citim etichetele de emotie din fisierele txt
                 for txt_file in txt_files:
-                    with open(txt_file, 'r') as f:
+                    with open(txt_file, 'r', encoding="utf-8") as f:
                         lines = f.readlines()
                         for line in lines:
                             label = line[line.find("["):].split(' ')[0].replace("[", "").replace("]", "")
@@ -327,6 +328,7 @@ class Preprocessing():
             out.add(f"y.shape = {y.shape}")
 
             return X, y
+        
         
 class Models:
     def __init__(self):
@@ -425,12 +427,12 @@ class Models:
         elif x.size == 0 and y.size == 0:
             err.add_error("Nu s-a realizat preprocesarea")
         else:
-            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(x, y, test_size=0.7, random_state=42) # 70% date de antrenare, 30% date de testare
+            self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(x, y, train_size=0.7, random_state=42) # 70% date de antrenare, 30% date de testare
 # random_state = 42 means that the split is reproducible, meaning that if the script is run again with the same random_state, the data will be split in the same way
-            out.add(f"X_train: {self.X_train}")
-            out.add(f"y_train: {self.y_train}")
-            out.add(f"X_test: {self.X_test}")
-            out.add(f"y_test: {self.y_test}")
+            out.add(f"X_train: {self.X_train.shape}")
+            out.add(f"y_train: {self.y_train.shape}")
+            out.add(f"X_test: {self.X_test.shape}")
+            out.add(f"y_test: {self.y_test.shape}")
             self.RandomForestClassifierModel.fit(self.X_train, self.y_train)
             self.SVCModel.fit(self.X_train, self.y_train)
             self.LogisticRegressionModel.fit(self.X_train, self.y_train)
