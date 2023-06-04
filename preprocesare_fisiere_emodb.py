@@ -18,22 +18,22 @@ from sklearn.model_selection import train_test_split
 #cmap='jet'
 
 def spectrograma(audio, sr, n_fft=2048, hop_length=160, n_mels=40, start=0, end=1, show=True):
-    # Calculați spectograma și transformați-o în decibeli
+    # Calcula?i spectograma ?i transforma?i-o în decibeli
     spec = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
     log_spec = librosa.amplitude_to_db(spec, ref=np.max)
     #log_spec = spec
-    # Aplicați o transformare liniară pentru a obține valorile în intervalul 0-255
+    # Aplica?i o transformare liniara pentru a ob?ine valorile în intervalul 0-255
     v_min = -90
     v_max = -7
     log_spec = (log_spec - v_min) / (v_max - v_min) * 255
     log_spec = np.clip(log_spec, 0, 255)
 
-    # Transformați spectograma logaritmică în RGB
+    # Transforma?i spectograma logaritmica în RGB
     cmap = plt.get_cmap('jet')
     log_spec_rgb = cmap(log_spec.astype(np.uint8))
 
     if show:
-        # Creează o bară de culoare personalizată cu culori ordonate
+        # Creeaza o bara de culoare personalizata cu culori ordonate
         mycolors = [(0.8,0,0), (1,0,0), (1,0.8,0), (1,1,0), (0,1,1), (0,0.2,0.8), (0,0,1), (0,0,0.4)]
         mycolors.reverse()
         boundaries = [-80, -70, -60, -50, -40, -30, -20, -10, 0]
@@ -57,11 +57,11 @@ def spectrograma(audio, sr, n_fft=2048, hop_length=160, n_mels=40, start=0, end=
         ax.set_ylabel("Hz")
         plt.show()
     
-    # Redimensionați spectrograma și transformați-o într-un tensor de 3 dimensiuni
+    # Redimensiona?i spectrograma ?i transforma?i-o într-un tensor de 3 dimensiuni
     log_spec_rgb = cv2.resize(log_spec_rgb, (224, 224), interpolation=cv2.INTER_AREA)
     log_spec_rgb_tensor = tf.keras.preprocessing.image.img_to_array(log_spec_rgb)
 
-    # Normalizați tensorul la intervalul [0, 1]
+    # Normaliza?i tensorul la intervalul [0, 1]
     #log_spec_rgb_tensor /= 255.0
 
     return log_spec_rgb_tensor
@@ -86,7 +86,7 @@ def get_emotion(file):
     return em
 
 def convert_to_tfrecord(value):
-    value = value.astype(np.float32)  # Asigură-te că valorile sunt de tipul np.float32
+    value = value.astype(np.float32)  # Asigura-te ca valorile sunt de tipul np.float32
     feature = {
         'value': tf.train.Feature(float_list=tf.train.FloatList(value=value.flatten())),
     }
@@ -175,17 +175,88 @@ def write_msg(output_file, msg):
     f.close()
     
     
-codif_emotii = {
-                'A' : 0,
-                'B' : 1,
-                'D' : 2,
-                'F' : 3,
-                'H' : 4,
-                'N' : 5,
-                'S' : 6
-                }
+emotii = ["A", "B", "D", "F", "H", "I", "N", "S"]
+
+num_classes = len(emotii)
+
+class My_label_encoder:
+    def __init__(self):
+        self.dict = {
+            "" : 0,
+            "A" : 1,
+            "A/B" : 2,
+            "A/D" : 3,
+            "A/F" : 4,
+            "A/H" : 5,
+            "A/I" : 6,
+            "A/N" : 7,
+            "A/S" : 8,
+            "B" : 9,
+            "B/A" : 10,
+            "B/D" : 11,
+            "B/F" : 12,
+            "B/H" : 13,
+            "B/I" : 14,
+            "B/N" : 15,
+            "B/S" : 16,
+            "D" : 17,
+            "D/A" : 18,
+            "D/B" : 19,
+            "D/F" : 20,
+            "D/H" : 21,
+            "D/I" : 22,
+            "D/N" : 23,
+            "D/S" : 24,
+            "F" : 25,
+            "F/A" : 26,
+            "F/B" : 27,
+            "F/D" : 28,
+            "F/H" : 29,
+            "F/I" : 30,
+            "F/N" : 31,
+            "F/S" : 32,
+            "H" : 33,
+            "H/A" : 34,
+            "H/B" : 35,
+            "H/D" : 36,
+            "H/F" : 37,
+            "H/I" : 38,
+            "H/N" : 39,
+            "H/S" : 40,
+            "I" : 41,
+            "I/A" : 42,
+            "I/B" : 43,
+            "I/D" : 44,
+            "I/F" : 45,
+            "I/H" : 46,
+            "I/N" : 47,
+            "I/S" : 48,
+            "N" : 49,
+            "N/A" : 50,
+            "N/B" : 51,
+            "N/D" : 52,
+            "N/F" : 53,
+            "N/H" : 54,
+            "N/I" : 55,
+            "N/S" : 56,
+            "S" : 57,
+            "S/A" : 58,
+            "S/B" : 59,
+            "S/D" : 60,
+            "S/F" : 61,
+            "S/H" : 62,
+            "S/I" : 63,
+            "S/N" : 64
+        }
+        
+    def encode_list(self, label_list):
+        encoded_list = []
+        for elem in label_list:
+            encoded_list.append(self.dict[elem])
+        return encoded_list
 
 path = "emodb/wav"
+mle = My_label_encoder()
 
 files, output_file_train_val, output_file_test, output_labels_train_val, output_labels_test = get_all(path)
 
@@ -207,34 +278,36 @@ for file in files:
 
     audio, sr = librosa.load(path + "/" + file)
 
-    # Calculați lungimea fiecărui cadru în eșantioane
+    # Calcula?i lungimea fiecarui cadru în e?antioane
     frame_length = int(sr)
     hop_length = int(sr * 0.01)
 
-    # Segmentați fișierul audio în cadre de 1 secundă cu un pas de 10 ms
+    # Segmenta?i fi?ierul audio în cadre de 1 secunda cu un pas de 10 ms
     audio_frames = librosa.util.frame(audio, frame_length=frame_length, hop_length=hop_length)
     #print(audio_frames.shape)
     i = 0
     #hopLengthinSpectrogram=int(sr*0.03)
-
+    
     for frame in audio_frames.T:
         #print(frame.shape)
         start, end = 0 + i * 0.01, 1 + i * 0.01
         log = spectrograma(frame, sr, start=start, end=end, show=False, n_fft=2048, n_mels=64, hop_length=int(sr*0.01))
         log_tf_record = convert_to_tfrecord(log)
-
+        
         if e_in_liste(file, A_impartit, B_impartit, D_impartit, F_impartit, H_impartit, S_impartit, N_impartit):
             writer_test.write(log_tf_record)
-            labels_test.append(codif_emotii[get_emotion(file)])
+            labels_test.append(get_emotion(file))
         else:
             writer_train_val.write(log_tf_record)
-            labels_train_val.append(codif_emotii[get_emotion(file)])
+            labels_train_val.append(get_emotion(file))
         i += 1
-
+        
     file_end_time = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
     print(f"{count_file}/{len(files)} done ({file_end_time - file_start_time})")
     count_file += 1
-
+    
+labels_train_val = mle.encode_list(labels_train_val)
+labels_test = mle.encode_list(labels_test)
 pickle.dump(labels_train_val, writer_labels_train_val)
 pickle.dump(labels_test, writer_labels_test)
 writer_train_val.close()

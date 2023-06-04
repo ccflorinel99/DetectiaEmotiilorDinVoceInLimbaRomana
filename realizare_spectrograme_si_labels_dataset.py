@@ -1,9 +1,71 @@
 import os
 from datetime import datetime
+import tensorflow as tf
 import librosa
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
 import re
 import pickle
 
+
+
+def spectrograma(audio, sr, n_fft=2048, hop_length=160, n_mels=40, start=0, end=1, show=True):
+    # Calculati spectograma si transformati-o in decibeli
+    spec = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+    log_spec = librosa.amplitude_to_db(spec, ref=np.max)
+    #log_spec = spec
+    # Aplicati o transformare liniara pentru a obtine valorile in intervalul 0-255
+    v_min = -90
+    v_max = -7
+    log_spec = (log_spec - v_min) / (v_max - v_min) * 255
+    log_spec = np.clip(log_spec, 0, 255)
+
+    # Transformati spectograma logaritmica in RGB
+    cmap = plt.get_cmap('jet')
+    log_spec_rgb = cmap(log_spec.astype(np.uint8))
+
+    if show:
+        # Creeaza o bara de culoare personalizata cu culori ordonate
+        mycolors = [(0.8,0,0), (1,0,0), (1,0.8,0), (1,1,0), (0,1,1), (0,0.2,0.8), (0,0,1), (0,0,0.4)]
+        mycolors.reverse()
+        boundaries = [-80, -70, -60, -50, -40, -30, -20, -10, 0]
+        # Creeati o harta de culori personalizata cu segmentari personalizate
+        cmap_seg = ListedColormap(mycolors)
+        norm = BoundaryNorm(boundaries, cmap_seg.N, clip=True)
+
+        # Adaugati durata segmentului audio in secunde
+        duration = len(audio) / sr
+        t = np.arange(0, duration, duration / log_spec.shape[1])
+
+        # Afisati spectrograma cu noua harta de culori si segmentari personalizate
+        fig, ax = plt.subplots()
+        im = ax.imshow(log_spec_rgb, aspect='auto', origin='lower', cmap=cmap_seg, norm=norm, extent=[0, duration, 0, sr/2])
+
+
+        # Adaugati colorbar personalizat cu segmentari si culori
+        cbar = fig.colorbar(im, ax=ax, ticks=boundaries)
+        cbar.ax.set_yticklabels([f'{i}' for i in boundaries])
+        ax.set_xlabel(f"Timp (s) (durata {duration}, din original: {start}-{end})")
+        ax.set_ylabel("Hz")
+        plt.show()
+    
+    # Redimensionati spectrograma si transformati-o intr-un tensor de 3 dimensiuni
+    log_spec_rgb = cv2.resize(log_spec_rgb, (224, 224), interpolation=cv2.INTER_AREA)
+    log_spec_rgb_tensor = tf.keras.preprocessing.image.img_to_array(log_spec_rgb)
+
+    # Normaliza?i tensorul la intervalul [0, 1]
+    #log_spec_rgb_tensor /= 255.0
+
+    return log_spec_rgb_tensor
+
+def convert_to_tfrecord(value):
+    value = value.astype(np.float32)  # Asigura-te ca valorile sunt de tipul np.float32
+    feature = {
+        'value': tf.train.Feature(float_list=tf.train.FloatList(value=value.flatten())),
+    }
+    example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
+    return example_proto.SerializeToString()
 
 
 index_start = 0
@@ -180,12 +242,6 @@ def salveaza(outfile, lista):
     pickle.dump(lista, writer)
     writer.close()
 
-def progres(folder_labels):
-    labels = len(os.listdir(folder_labels)) - 42 # o sa le bag in acelasi folder cu spectrogramele
-    p = round(labels * 100 / 42, 2)
-    return f"Progres: {p}%"
-
-
 class My_label_encoder:
     def __init__(self):
         self.dict = {
@@ -263,41 +319,75 @@ class My_label_encoder:
         return encoded_list
 
 
-for nr_fisier in range(1):
-    nr = 42#nr_fisier + 1
-    outfile = "spectrograme/" + str(nr) + ".pkl"
-    audio_file = "dataset/" + str(nr) + ".wav"
+def progres(folder_spectrograme):
+    spectrograme = len(os.listdir(folder_spectrograme))
+    p = round(spectrograme * 100 / 84, 2)
+    return f"Progres: {p}%"
+
+def write_msg(msg):
+    f = open("detalii_realizare_spectrograme_si_labels.txt", "a")
+    f.write(msg)
+    f.close()
+
+
+
+path = "dataset"
+director_spectrograme = "spectrograme"
+if not os.path.exists(director_spectrograme):
+    os.mkdir(director_spectrograme)
+
+counter = 1
+total_frames = 0
+mle = My_label_encoder()
+start = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+
+for i in range(42):
+    nr = i + 1
+    audio_file = path + "/" + str(nr) + ".wav"
     filename_etichetare = audio_file[:-3] + "txt"
+    outfile = "spectrograme/" + str(nr) + ".bin"
+    writer = tf.io.TFRecordWriter(outfile)
+    audio, sr = librosa.load(path + "/" + audio_file)
 
-    audio, sr = librosa.load(audio_file)
-
-    # Calculați lungimea fiecărui cadru în eșantioane
+    # Calculati lungimea fiecarui cadru in e?antioane
     frame_length = int(sr)
     hop_length = int(sr * 0.01)
 
-    # Segmentați fișierul audio în cadre de 1 secundă cu un pas de 10 ms
+    # Segmentati fisierul audio in cadre de 1 secunda cu un pas de 10 ms
     audio_frames = librosa.util.frame(audio, frame_length=frame_length, hop_length=hop_length)
-    #print(audio_frames.shape)
-
+    frames = audio_frames.T
+    total_frames += len(frames)
     alegeri = []
     se_emotii = start_end_emotii(filename_etichetare)
 
+    #print(audio_frames.shape)
     i = 0
-    print(f"frames: {len(audio_frames.T)}")
+    print(f"file: {file}, file_no: {counter}, frames: {len(frames)} is starting")
+    #hopLengthinSpectrogram=int(sr*0.03)
     file_start_time = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
-    for frame in audio_frames.T:
+    for frame in frames:
+        #print(frame.shape)
         step = i * 0.01
         start, end = 0 + step, 1 + step
-        #print(frame.shape)
+        log = spectrograma(frame, sr, start=start, end=end, show=False, n_fft=2048, n_mels=64, hop_length=int(sr*0.01))
+        log_tf_record = convert_to_tfrecord(log)
+        writer.write(log_tf_record)
         alegeri.append(alegere(f"{start}-{end}", se_emotii))
         i += 1
-        if i == round(len(audio_frames.T) / 2):
+        if i == round(len(frames) / 2):
             current_time = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
             print(f"Halfway there. Elapsed untill now {current_time - file_start_time}")
-        
-    file_end_time = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
-    mle = My_label_encoder()
-    alegeri = mle.encode_list(alegeri)
-    salveaza(outfile, alegeri)
-    print(f"done ({file_end_time - file_start_time}), {progres('spectrograme')}")
 
+    salveaza(outfile, mle.encode_list(alegeri))
+    file_end_time = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+    print(f"{outfile} done ({file_end_time - file_start_time})")
+    write_msg(f"file: {file}, frames: {len(frames)} done in {file_end_time - file_start_time}")
+    writer.close()
+    print(f"{counter}/{len(files)} done, {progres('spectrograme')}")
+    counter += 1
+
+end = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+elapsed = end - start
+msg = f"total frames: {total_frames}, elapsed: {elapsed}\n"
+print(msg)
+write_msg(msg)
