@@ -36,7 +36,6 @@ from tkinter import *
 from tkinter import filedialog
 import keyboard
 import time
-from pydub import AudioSegment
 import librosa
 
 class Files:
@@ -136,7 +135,7 @@ class AudioManipulation:
         if self.files.path_exists(file_path):
             audio = AudioSegment.from_wav(file_path)
             # sr = sample rate
-            _ , sr = sf.read(file_path)  
+            sr = audio.frame_rate  
             return audio, sr
 # Sample rate, sau "rata de eșantionare", reprezintă numărul de eșantioane de semnal luate pe secundă.
 # Este exprimat în herți (Hz) și reprezintă numărul de câți eșantioane sunt luate pe secundă din semnalul audio.
@@ -217,8 +216,8 @@ class Preprocessing():
                         lines = f.readlines()
                         # impartim fisierul audio in fragmente
                         for line in lines:
-                            start = float(line[:line.find("[")].split(' ')[0].split('\t')[0])
-                            end = float(line[:line.find("[")].split(' ')[0].split('\t')[1])
+                            start = float(line[:line.find("[")].split(' ')[0].split('\t')[0]) * 1000
+                            end = float(line[:line.find("[")].split(' ')[0].split('\t')[1]) * 1000
                             fragment_audio = audio[start:end]
                             # adaugam fragmentul audio la lista de fragmente
                             audios.append(fragment_audio)
@@ -319,13 +318,11 @@ class Preprocessing():
                         X = np.append(X, features)
 
             X = X.reshape(-1, 1)
-            out.add(f"X.shape = {X.shape}")
             
     
             # transformam etichetele de emotie in forma utilizabila de model
             le = LabelEncoder()
             y = le.fit_transform(labels)
-            out.add(f"y.shape = {y.shape}")
 
             return X, y
         
