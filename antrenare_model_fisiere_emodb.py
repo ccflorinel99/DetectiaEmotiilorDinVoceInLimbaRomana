@@ -161,7 +161,7 @@ for epoch in range(0, max_epochs):
         i = 0
         start_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
 
-        if trainValBatchNo < 5: # stiu deja ca nr maxim e 5
+        if trainValBatchNo + 2 < 5: # stiu deja ca nr maxim e 5 si numaratoarea in fisier incepe de la -1, unde -1 e primul batch care are nr 1
             for batch_train_val in dataset_train_val.as_numpy_iterator():
                 print(f"i = {i}")
                 if trainValBatchNo < i:
