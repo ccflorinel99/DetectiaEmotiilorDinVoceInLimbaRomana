@@ -15,12 +15,12 @@ from sklearn.model_selection import train_test_split
 import tensorflow.keras as keras
 
 def write_msg(msg):
-    f = open("detalii_antrenare.txt", "a", encoding="utf-8")
+    f = open("detalii_antrenare_dataset.txt", "a", encoding="utf-8")
     f.write(msg)
     f.close()
     
 
-output_file_train_val, output_file_test, output_labels_train_val, output_labels_test = 'spectrograme_train_val.bin', 'spectrograme_test.bin', 'labels_train_val.bin', 'labels_test.bin'
+file_train_val, file_test, labels_train_val, labels_test = 'spectrograme/spec_train_val.bin', 'spectrograme/spec_test.bin', 'spectrograme/labels_train_val.bin', 'spectrograme/labels_test.bin'
     
 class My_label_encoder:
     def __init__(self):
@@ -82,7 +82,7 @@ def load_dataset(file_pattern, batch_size=32):
 
 batch_size = 10000
 
-filename_model = "model_vgg16.h5"
+filename_model = "model_vgg16_dataset.h5"
 
 if os.path.exists(filename_model):
     model = keras.models.load_model(filename_model)
@@ -94,7 +94,7 @@ else:
 
 class Details:
     def __init__(self):
-        self.file = "details.txt"
+        self.file = "details_dataset.txt"
         if os.path.exists(self.file):
             with open(self.file, 'r') as f:
                 lines = f.readlines()
@@ -126,9 +126,9 @@ class Details:
             if self.batch_test < test_batch_no:
                 self.batch_test = test_batch_no
         
-        with open(self.file, 'w') as f:
-            msg = f"epoci: {self.epoci}, batch_train_val_no: {self.batch_train_val}, batch_test_no: {self.batch_test}"
-            f.write(msg)
+            with open(self.file, 'w') as f:
+                msg = f"epoci: {self.epoci}, batch_train_val_no: {self.batch_train_val}, batch_test_no: {self.batch_test}"
+                f.write(msg)
 
     def reinit(self):
         self.__init__()
@@ -145,13 +145,13 @@ for epoch in range(0, max_epochs):
 
     if done_epochs <= epoch:
         start_load = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
-
-        dataset_train_val = load_dataset(file_pattern=output_file_train_val, batch_size=batch_size)
-        dataset_test = load_dataset(file_pattern=output_file_test, batch_size=batch_size)
-        with open(output_labels_train_val, 'rb') as f:
+    
+        dataset_train_val = load_dataset(file_pattern=file_train_val, batch_size=batch_size)
+        dataset_test = load_dataset(file_pattern=file_test, batch_size=batch_size)
+        with open(labels_train_val, 'rb') as f:
             y_train_val_all = np.array(pickle.load(f))
 
-        with open(output_labels_test, 'rb') as f:
+        with open(labels_test, 'rb') as f:
             y_test_all = np.array(pickle.load(f))
 
         end_load = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
@@ -160,37 +160,35 @@ for epoch in range(0, max_epochs):
 
         i = 0
         start_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+    
+        for batch_train_val in dataset_train_val.as_numpy_iterator():
+            if trainValBatchNo < i:
+                start, end = i * batch_size, (i + 1) * batch_size
+                if end > y_train_val_all.shape[0]:
+                    end = -1
+                X_train_val = batch_train_val[:, :, :, :3]
 
-        if trainValBatchNo < 5: # stiu deja ca nr maxim e 5
-            for batch_train_val in dataset_train_val.as_numpy_iterator():
-                print(f"i = {i}")
-                if trainValBatchNo < i:
-                    start, end = i * batch_size, (i + 1) * batch_size
-                    if end > y_train_val_all.shape[0]:
-                        end = -1
-                    X_train_val = batch_train_val[:, :, :, :3]
+                y_train_val = y_train_val_all[start:end]
 
-                    y_train_val = y_train_val_all[start:end]
+                if X_train_val.shape[0] > y_train_val.shape[0]:
+                    X_train_val = X_train_val[:y_train_val.shape[0]]
 
-                    if X_train_val.shape[0] > y_train_val.shape[0]:
-                        X_train_val = X_train_val[:y_train_val.shape[0]]
-
-                    X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.2, random_state=42) # 70% date de antrenare, 30% date de testare
+                X_train, X_val, y_train, y_val = train_test_split(X_train_val, y_train_val, test_size=0.2, random_state=42) # 70% date de antrenare, 30% date de testare
     # random_state = 42 means that the split is reproducible, meaning that if the script is run again with the same random_state, the data will be split in the same way
-                    y_train = to_categorical(y_train, num_classes)
-                    y_val = to_categorical(y_val, num_classes)
+                y_train = to_categorical(y_train, num_classes)
+                y_val = to_categorical(y_val, num_classes)
 
-                    print(f"X_train.shape = {X_train.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
-                    print(f"y_train.shape = {y_train.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
-                    print(f"X_val.shape = {X_val.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
-                    print(f"y_val.shape = {y_val.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
+                print(f"X_train.shape = {X_train.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
+                print(f"y_train.shape = {y_train.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
+                print(f"X_val.shape = {X_val.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
+                print(f"y_val.shape = {y_val.shape}, batch no: {i + 1}, epoch no: {epoch + 1}/{max_epochs}")
 
-                    model.fit(X_train, y_train, batch_size=15, epochs=10, validation_data=(X_val, y_val))
-                    de.salveaza(epoch, i, -1)
-                    model.save(filename_model)
+                model.fit(X_train, y_train, batch_size=15, epochs=10, validation_data=(X_val, y_val))
+                de.salveaza(epoch, i, -1)
+                model.save(filename_model)
         
-                i += 1
-            de.salveaza(epoch, i, -1)
+            i += 1
+        de.salveaza(epoch, i, -1)
 
         j = 0
         for batch_test in dataset_test.as_numpy_iterator():
@@ -221,6 +219,8 @@ for epoch in range(0, max_epochs):
         elapsed = end_train - start_train
         print(f"elapsed: {elapsed}")
         de.salveaza(epoch + 1, -1, -1)
+
+
 
 end_all = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
 elapsed = end_all - start_all
