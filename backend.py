@@ -519,39 +519,32 @@ class Models:
         
         
     def predictie(self):
-        counts = [] # unde pun fiecare de cate ori apare
-        em = [] #unde o sa pun emotiile
-    
-        for key in self.emotions.d:
-            emotie = self.emotions.d[key]
-            count = 0
-            for i in range(len(self.predictii)):
-                if self.predictii[i] == emotie:
-                    count += 1
-            
-            counts.append(count)
-            em.append(emotie)
-        
+        predictii = np.array(self.predictii)
+        # Numărați valorile unice și frecvența lor
+        unique_values, counts = np.unique(predictii, return_counts=True)
+
+        # Crearea unui dicționar pentru a cataloga valorile și frecvența lor
+        value_counts = {}
+
+        # Iterați prin valorile unice și frecvența lor și adăugați-le în dicționar
+        for value, count in zip(unique_values, counts):
+            value_counts[value] = count
+
+        print(value_counts)
         maxim = 0
-        minim = 0
-        e = "" # emotia finala
-    
-        for i in range(len(counts)):
-            if counts[i] == minim:
-                pass
-            elif counts[i] > maxim:
-                maxim = counts[i]
-        
-        ctr = 0 # pt egale
-        for i in range(len(counts)):
-            if counts[i] == maxim:
-                ctr += 1
-                if e == "":
-                    e = self.emotions.d[i]
-                else:
-                    e = e + "/" + self.emotions.d[i]
+        for key in value_counts:
+            if maxim < value_counts[key]:
+                maxim = value_counts[key]
                 
-        return e
+        msg = ""
+        for key in value_counts:
+            if value_counts[key] == maxim:
+                if msg == "":
+                    msg = key
+                else:
+                    msg += f"/{key}"
+                    
+        return msg
 
 class Record:
 # pe google colab nu va merge PortAudioError: Error querying device -1
@@ -660,6 +653,7 @@ class App:
             else:
                 err.add_error("Alegere neidentificată")
 
+                
 # forma adnotarilor: [eticheta emotie] [etichete fundal] [eticheta personaj] text
 # eticheta emotie poate avea urmatoarele valori:
 #   A = anger
