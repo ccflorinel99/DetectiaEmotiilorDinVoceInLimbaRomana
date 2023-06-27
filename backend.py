@@ -37,6 +37,14 @@ from tkinter import filedialog
 import keyboard
 import time
 import librosa
+import tensorflow.keras as keras
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, LinearSegmentedColormap, BoundaryNorm
+import cv2
+from datetime import datetime
+
+
 
 class Files:
     def __init__(self):
@@ -270,15 +278,7 @@ class Preprocessing():
             # pitch_change_rate si respiration_rate au cele mai mari sanse sa dea nan  
             a = np.nan_to_num(a)
             
-            count = len(a)
-            
-            suma = 0
-            for i in range(count):
-                suma = suma + a[i]
-                
-            a = suma/count
-            a = np.array(a)
-            return a
+            return np.mean(a)#np.array(np.mean(a))
 
   
     def preprocesare(self):
@@ -326,7 +326,179 @@ class Preprocessing():
 
             return X, y
         
+class My_label_encoder:
+    def __init__(self):
+        self.dict = {
+            "A" : 0,
+            "B" : 1,
+            "D" : 2,
+            "F" : 3,
+            "H" : 4,
+            "I" : 5,
+            "N" : 6,
+            "S" : 7
+        }
         
+    def encode_list(self, label_list):
+        encoded_list = []
+        for elem in label_list:
+            encoded_list.append(self.dict[elem])
+        return encoded_list
+    
+    def get_no_of_classes(self):
+        return len(self.dict)
+    
+    def get_N_codif(self):
+        return self.dict["N"]
+    
+    def decode_list(self, encoded_list):
+        dec_list = []
+        for elem in encoded_list:
+            for key in self.dict:
+                if elem == self.dict[key]:
+                    dec_list.append(key)
+                    
+        return dec_list
+    
+
+class VGG16_Modif:
+    def __init__(self, filename_model="model_vgg16.h5"): #default il ia pe cel antrenat pe fisierele emodb
+        self.model = keras.models.load_model(filename_model)
+        
+    def spectrograma(self, audio, sr, n_fft=2048, hop_length=160, n_mels=64, start=0, end=1, show=True):
+        # Calculati spectograma si transformati-o in decibeli
+        spec = librosa.feature.melspectrogram(y=audio, sr=sr, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+        log_spec = librosa.amplitude_to_db(spec, ref=np.max)
+        #log_spec = spec
+        # Aplicati o transformare liniara pentru a obtine valorile in intervalul 0-255
+        v_min = -90
+        v_max = -7
+        log_spec = (log_spec - v_min) / (v_max - v_min) * 255
+        log_spec = np.clip(log_spec, 0, 255)
+
+        # Transformati spectograma logaritmica in RGB
+        cmap = plt.get_cmap('jet')
+        log_spec_rgb = cmap(log_spec.astype(np.uint8))
+
+        if show:
+            # Creeaza o bara de culoare personalizata cu culori ordonate
+            mycolors = [(0.8,0,0), (1,0,0), (1,0.8,0), (1,1,0), (0,1,1), (0,0.2,0.8), (0,0,1), (0,0,0.4)]
+            mycolors.reverse()
+            boundaries = [-80, -70, -60, -50, -40, -30, -20, -10, 0]
+            # Creeati o harta de culori personalizata cu segmentari personalizate
+            cmap_seg = ListedColormap(mycolors)
+            norm = BoundaryNorm(boundaries, cmap_seg.N, clip=True)
+
+            # Adaugati durata segmentului audio in secunde
+            duration = len(audio) / sr
+            t = np.arange(0, duration, duration / log_spec.shape[1])
+
+            # Afisati spectrograma cu noua harta de culori si segmentari personalizate
+            fig, ax = plt.subplots()
+            im = ax.imshow(log_spec_rgb, aspect='auto', origin='lower', cmap=cmap_seg, norm=norm, extent=[0, duration, 0, sr/2])
+
+
+            # Adaugati colorbar personalizat cu segmentari si culori
+            cbar = fig.colorbar(im, ax=ax, ticks=boundaries)
+            cbar.ax.set_yticklabels([f'{i}' for i in boundaries])
+            ax.set_xlabel(f"Timp (s) (durata {duration}, din original: {start}-{end})")
+            ax.set_ylabel("Hz")
+            plt.show()
+    
+        # Redimensionati spectrograma si transformati-o intr-un tensor de 3 dimensiuni
+        log_spec_rgb = cv2.resize(log_spec_rgb, (224, 224), interpolation=cv2.INTER_AREA)
+        log_spec_rgb_tensor = tf.keras.preprocessing.image.img_to_array(log_spec_rgb)
+
+        # Normalizati tensorul la intervalul [0, 1]
+        #log_spec_rgb_tensor /= 255.0
+
+        return log_spec_rgb_tensor
+        
+    def use(self, filename):
+        outputs = []
+        audio, sr = librosa.load(filename)
+
+        # Calculați lungimea fiecărui cadru în eșantioane
+        frame_length = int(sr)
+        hop_length = int(sr * 0.01)
+
+        # Segmentați fișierul audio în cadre de 1 secundă cu un pas de 10 ms
+        audio_frames = librosa.util.frame(audio, frame_length=frame_length, hop_length=hop_length)
+        #print(audio_frames.shape)
+        i = 0
+        #hopLengthinSpectrogram=int(sr*0.03)
+
+        for frame in audio_frames.T:
+            #print(frame.shape)
+            start, end = 0 + i * 0.01, 1 + i * 0.01
+            log = self.spectrograma(frame, sr, start=start, end=end, show=False, hop_length=hop_length)
+            log = np.array([log[:, :, :3]])
+            outputs.append(self.model.predict(log))
+            print(f"{i+1}/{len(audio_frames.T)} done")
+            i += 1
+    
+        lista = []
+
+        for o in outputs:
+            for elem in o[0]:
+                lista.append(elem)
+
+        return self.vot(self.get_dict(lista))
+
+    def get_dict(self, lista):
+        #print(np.array(lista).all() == np.array(lista_load).all())
+        a = np.array(lista)
+        # Numărați valorile unice și frecvența lor
+        unique_values, counts = np.unique(a, return_counts=True)
+
+        # Crearea unui dicționar pentru a cataloga valorile și frecvența lor
+        value_counts = {}
+
+        # Iterați prin valorile unice și frecvența lor și adăugați-le în dicționar
+        for value, count in zip(unique_values, counts):
+            if np.isnan(value):
+                value = 'nan'
+            value_counts[value] = count
+            
+        return value_counts
+    
+    def get_dict_fara_nan(self, lista):
+        #print(np.array(lista).all() == np.array(lista_load).all())
+        a = np.array(lista)
+        # Numărați valorile unice și frecvența lor
+        unique_values, counts = np.unique(a, return_counts=True)
+
+        # Crearea unui dicționar pentru a cataloga valorile și frecvența lor
+        value_counts = {}
+
+        # Iterați prin valorile unice și frecvența lor și adăugați-le în dicționar
+        for value, count in zip(unique_values, counts):
+            value_counts[value] = count
+            
+        return value_counts
+    
+    def vot(self, array_emotii):
+        maxim = 0
+
+        for key in array_emotii:
+            if key != "nan":
+                if maxim < array_emotii[key]:
+                    maxim = array_emotii[key]
+            
+        msg = ""
+        if maxim == 0: # toate valorile sunt nan
+            msg = "N" # bag neutru ca fiind emotia
+        else: # am si alte valori
+            for key in array_emotii:
+                if maxim == array_emotii[key]:
+                    if msg == "":
+                        msg = key
+                    else:
+                        msg += f"/{key}"
+
+        return msg
+        
+
 class Models:
     def __init__(self):
         self.am = AudioManipulation()
@@ -497,8 +669,8 @@ class Models:
         # transformati rezultatul predictiei in eticheta de emotie
         label_encoder = LabelEncoder()
         emotion_labels = label_encoder.fit_transform(self.emotions.to_list())
-        out.add(f"Codificări: {emotion_labels}")
-        out.add(f"Emoții: {self.emotions.to_list()}")
+        #out.add(f"Codificări: {emotion_labels}")
+        #out.add(f"Emoții: {self.emotions.to_list()}")
         self.emotion_RandomForestClassifierModel = self.emotions.get_emotion(emotion_labels[self.prediction_RandomForestClassifierModel[0]])
         self.emotion_SVCModel = self.emotions.get_emotion(emotion_labels[self.prediction_SVCModel[0]])
         self.emotion_LogisticRegressionModel = self.emotions.get_emotion(emotion_labels[self.prediction_LogisticRegressionModel[0]])
@@ -510,12 +682,14 @@ class Models:
         self.predictii.append(self.emotion_DecisionTreeClassifierModel)
         self.predictii.append(self.emotion_MLPClassifierModel)
         
-        out.add(f"RandomForestClassifierModel: {self.emotion_RandomForestClassifierModel}")
-        out.add(f"SVCModel: {self.emotion_SVCModel}")
-        out.add(f"LogisticRegressionModel: {self.emotion_LogisticRegressionModel}")
-        out.add(f"DecisionTreeClassifierModel: {self.emotion_DecisionTreeClassifierModel}")
-        out.add(f"MLPClassifierModel: {self.emotion_MLPClassifierModel}")
-        out.add(f"Decizia finală: {self.predictie()}")
+        #out.add(f"RandomForestClassifierModel: {self.emotion_RandomForestClassifierModel}")
+        #out.add(f"SVCModel: {self.emotion_SVCModel}")
+        #out.add(f"LogisticRegressionModel: {self.emotion_LogisticRegressionModel}")
+        #out.add(f"DecisionTreeClassifierModel: {self.emotion_DecisionTreeClassifierModel}")
+        #out.add(f"MLPClassifierModel: {self.emotion_MLPClassifierModel}")
+        em = self.predictie()
+        #out.add(f"Decizia finală: {em}")
+        return em
         
         
     def predictie(self):
@@ -530,7 +704,6 @@ class Models:
         for value, count in zip(unique_values, counts):
             value_counts[value] = count
 
-        print(value_counts)
         maxim = 0
         for key in value_counts:
             if maxim < value_counts[key]:
@@ -582,6 +755,7 @@ class App:
         self.p = Preprocessing()
         self.files = Files()
         self.recorded_filename = "output.wav"
+        self.vgg16 = VGG16_Modif()
         if sys.version_info < (3, 6):
             err.add_error("Trebuie să ai minim python 3.6 înainte de a rula această aplicație")
         if sys.version_info >= (3, 10):
@@ -623,7 +797,11 @@ class App:
                 err.add_error("Nu poți folosi modelele dacă nu au fost antrenate sau încărcate de undeva")
             else:
                 self.p = Preprocessing()
-                self.m.use_models(audio_filename, self.p)
+                em1 = self.m.use_models(audio_filename, self.p)
+                em2 = self.vgg16.use(audio_filename)
+                lista = f"{em1}/{em2}".split("/")
+                em = self.vgg16.vot(self.vgg16.get_dict_fara_nan(lista))
+                out.add(em)
 
     def show_output(self):
         if err.got_error():
@@ -640,9 +818,13 @@ class App:
             if choice == "antrenare":
                 # nu o sa mearga pe colab
                 Tk().withdraw() # prevents an empty tkinter window from appearing
-                dir = filedialog.askdirectory()
-                self.train(dir)
+                folder = filedialog.askdirectory()
+                print("Am pornit antrenarea")
+                start_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+                self.train(folder)
                 self.save_models()
+                end_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+                print(f"Am terminat antrenarea (elapsed: {end_train - start_train})")
             elif choice == "folosire":
                 self.load_models()
                 if not self.trained_models and not self.loaded_models:
