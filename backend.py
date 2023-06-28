@@ -275,7 +275,7 @@ class Preprocessing():
                 respiration_rate = len(syllable_lengths) / sum(syllable_lengths)
 
             # returnam caracteristicile
-            a = [np.mean(amplitudes), np.mean(spectrogram), pitch_change_rate, np.mean(syllable_lengths), np.mean(pause_lengths), respiration_rate]
+            a = np.array([np.mean(amplitudes), np.mean(spectrogram), pitch_change_rate, np.mean(syllable_lengths), np.mean(pause_lengths), respiration_rate])
             # pitch_change_rate si respiration_rate au cele mai mari sanse sa dea nan  
             a = np.nan_to_num(a)
             
