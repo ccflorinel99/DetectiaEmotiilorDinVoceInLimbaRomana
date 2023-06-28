@@ -43,6 +43,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap, BoundaryNorm
 import cv2
 from datetime import datetime
+from tabulate import tabulate
 
 
 
@@ -497,6 +498,13 @@ class VGG16_Modif:
                         msg += f"/{key}"
 
         return msg
+    
+    def get_accuracy(self):
+        f=open("accuracy.txt", "r")
+        accuracy = float(f.readlines()[0])
+        f.close()
+        
+        return accuracy
         
 
 class Models:
@@ -596,6 +604,8 @@ class Models:
         elif x.size == 0 and y.size == 0:
             err.add_error("Nu s-a realizat preprocesarea")
         else:
+            out.add(f"X: {x.shape}")
+            out.add(f"y: {y.shape}")
             self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(x, y, train_size=0.7, random_state=42) # 70% date de antrenare, 30% date de testare
 # random_state = 42 means that the split is reproducible, meaning that if the script is run again with the same random_state, the data will be split in the same way
             out.add(f"X_train: {self.X_train.shape}")
@@ -634,15 +644,14 @@ class Models:
             self.accuracy_MLPClassifier = self.accuracy_score(self.y_test, self.y_pred_MLPClassifier)
 
 
-    def create_table(self):
-        from tabulate import tabulate
-
+    def create_table(self, accuracy_vgg16):
         #create data
         data = [["RandomForestClassifier Model", self.accuracy_RandomForestClassifier], 
                 ["SVC Model", self.accuracy_SVC], 
                 ["LogisticRegression Model", self.accuracy_LogisticRegression], 
                 ["DecisionTreeClassifier Model", self.accuracy_DecisionTreeClassifier],
-                ["MLPClassifier Model", self.accuracy_MLPClassifier]]
+                ["MLPClassifier Model", self.accuracy_MLPClassifier],
+                ["VGG16 modified Model", accuracy_vgg16]]
   
         #define header names
         col_names = ["Models", "Accuracy"]
@@ -682,13 +691,8 @@ class Models:
         self.predictii.append(self.emotion_DecisionTreeClassifierModel)
         self.predictii.append(self.emotion_MLPClassifierModel)
         
-        #out.add(f"RandomForestClassifierModel: {self.emotion_RandomForestClassifierModel}")
-        #out.add(f"SVCModel: {self.emotion_SVCModel}")
-        #out.add(f"LogisticRegressionModel: {self.emotion_LogisticRegressionModel}")
-        #out.add(f"DecisionTreeClassifierModel: {self.emotion_DecisionTreeClassifierModel}")
-        #out.add(f"MLPClassifierModel: {self.emotion_MLPClassifierModel}")
         em = self.predictie()
-        #out.add(f"Decizia finală: {em}")
+        
         return em
         
         
@@ -777,7 +781,7 @@ class App:
             # afisare acuratete modele
             self.m.models_accuracy()
             # creare tabel pentru a putea vedea detaliile mai bine
-            self.m.create_table()
+            self.m.create_table(self.vgg16.get_accuracy())
             self.trained_models = True
 
     def save_models(self):
@@ -812,19 +816,45 @@ class App:
             print("output:")
             out.show()
             out.clear()
+    
+    def check_directory(self, directory):
+        if directory == "":
+            return False
+    
+        files = os.listdir(directory)
+        count_txt = 0
+        count_wav = 0
+        count_not_good = 0
 
+        for file in files:
+            ext = file[-3:]
+            if ext == "wav":
+                count_wav += 1
+            elif ext == "txt":
+                count_txt += 1
+            else:
+                count_not_good += 1
+    
+        if count_wav != count_txt or count_not_good != 0:
+            return False
+        else:
+            return True
+    
     def start(self, choice):
         if not err.got_error():
             if choice == "antrenare":
                 # nu o sa mearga pe colab
                 Tk().withdraw() # prevents an empty tkinter window from appearing
                 folder = filedialog.askdirectory()
-                print("Am pornit antrenarea")
-                start_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
-                self.train(folder)
-                self.save_models()
-                end_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
-                print(f"Am terminat antrenarea (elapsed: {end_train - start_train})")
+                if self.check_directory(folder):
+                    print("Am pornit antrenarea")
+                    start_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+                    self.train(folder)
+                    self.save_models()
+                    end_train = datetime.strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+                    print(f"Am terminat antrenarea (elapsed: {end_train - start_train})")
+                else:
+                    err.add_error(f"Folderul {folder} nu conține fișiere de forma FILENAME.txt - FILENAME.wav pentru a se putea realiza antrenarea. Alege alt folder")
             elif choice == "folosire":
                 self.load_models()
                 if not self.trained_models and not self.loaded_models:
