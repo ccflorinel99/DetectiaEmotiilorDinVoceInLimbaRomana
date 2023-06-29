@@ -361,6 +361,11 @@ class My_label_encoder:
                     
         return dec_list
     
+    def decode_value(self, value):
+        for key in self.dict:
+            if self.dict[key] == value:
+                return key
+    
 
 class VGG16_Modif:
     def __init__(self, filename_model="model_vgg16.h5"): #default il ia pe cel antrenat pe fisierele emodb
@@ -415,7 +420,7 @@ class VGG16_Modif:
 
         return log_spec_rgb_tensor
         
-    def use(self, filename):
+    def use(self, filename, mle):
         outputs = []
         audio, sr = librosa.load(filename)
 
@@ -444,7 +449,7 @@ class VGG16_Modif:
             for elem in o[0]:
                 lista.append(elem)
 
-        return self.vot(self.get_dict(lista))
+        return mle.decode_value(round(np.mean(np.array(lista))))
 
     def get_dict(self, lista):
         #print(np.array(lista).all() == np.array(lista_load).all())
@@ -758,6 +763,7 @@ class App:
         self.m = Models()
         self.p = Preprocessing()
         self.files = Files()
+        self.mle = My_label_encoder()
         self.recorded_filename = "output.wav"
         self.vgg16 = VGG16_Modif()
         if sys.version_info < (3, 6):
@@ -802,9 +808,10 @@ class App:
             else:
                 self.p = Preprocessing()
                 em1 = self.m.use_models(audio_filename, self.p)
-                em2 = self.vgg16.use(audio_filename)
+                em2 = self.vgg16.use(audio_filename, self.mle)
                 lista = f"{em1}/{em2}".split("/")
-                em = self.vgg16.vot(self.vgg16.get_dict_fara_nan(lista))
+                l = self.vgg16.get_dict_fara_nan(lista)
+                em = self.vgg16.vot(l)
                 out.add(em)
 
     def show_output(self):
@@ -821,6 +828,9 @@ class App:
         if directory == "":
             return False
     
+        if directory.find("emodb/wav") != -1:
+            return True
+        
         files = os.listdir(directory)
         count_txt = 0
         count_wav = 0
@@ -860,7 +870,7 @@ class App:
                 if not self.trained_models and not self.loaded_models:
                     err.add_error("Nu poți folosi modelele dacă nu au fost antrenate sau încărcate înainte")
                 else:
-                    r = Record(self.recorded_filename, out)
+                    #r = Record(self.recorded_filename, out)
                     self.use(self.recorded_filename)
             else:
                 err.add_error("Alegere neidentificată")
