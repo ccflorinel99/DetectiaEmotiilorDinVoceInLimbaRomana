@@ -870,7 +870,7 @@ class App:
                 if not self.trained_models and not self.loaded_models:
                     err.add_error("Nu poți folosi modelele dacă nu au fost antrenate sau încărcate înainte")
                 else:
-                    #r = Record(self.recorded_filename, out)
+                    r = Record(self.recorded_filename, out)
                     self.use(self.recorded_filename)
             else:
                 err.add_error("Alegere neidentificată")
