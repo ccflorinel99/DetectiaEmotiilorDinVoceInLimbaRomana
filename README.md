@@ -42,4 +42,4 @@ Pentru cel cu extensia .wav se poate vedea în poză cum se face, iar în cel .t
 *Exemplu: FILENAME.wav FILENAME.txt*  
 ![image](https://user-images.githubusercontent.com/31506258/213907164-4a83bfda-501a-4851-9d4d-7d684f37fdb3.png)  
 
-Pentru a putea folosi această aplicație aveți nevoie de câteva pachete instalate. Dacă nu le aveți, puteți rula comanda ```pip install numpy pandas scikit-learn pydub soundfile sounddevice scipy opencv-python tensorflow matplotlib librosa keyboard wave pysimplegui``` sau dacă aveți anaconda, rulați comanda ```conda install numpy pandas scikit-learn pydub soundfile sounddevice scipy opencv-python tensorflow matplotlib librosa keyboard wave pysimplegui```
+Pentru a putea folosi această aplicație aveți nevoie de câteva pachete instalate. Dacă nu le aveți, puteți rula comanda ```pip install numpy pandas scikit-learn opencv-python soundfile sounddevice pydub librosa tensorflow matplotlib keyboard tabulate pysimplegui``` sau dacă aveți anaconda, rulați comanda ```conda install numpy pandas scikit-learn opencv-python soundfile sounddevice pydub librosa tensorflow matplotlib keyboard tabulate pysimplegui```
