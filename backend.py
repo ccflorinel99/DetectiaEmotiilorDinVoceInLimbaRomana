@@ -10,8 +10,7 @@
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 # type of generalized linear model (GLM) that uses a logistic function to model a binary dependent variable. It estimates the probability that a given input belongs to a particular class and then classifies it based on a threshold (supervised)
@@ -19,15 +18,13 @@ from sklearn.tree import DecisionTreeClassifier
 # flowchart-like structure, where each internal node represents a feature(or attribute), each branch represents a decision rule, and each leaf node represents the outcome (supervised)
 from sklearn.neural_network import MLPClassifier
 # type of feedforward artificial neural network that consists of one or more layers of artificial neurons, called perceptrons. Each perceptron receives input from the previous layer and applies a non-linear activation function to it before passing the output to the next layer. The last layer of perceptrons is called the output layer and it generates the final predictions. The algorithm learns the weights of the perceptrons by minimizing the difference between the predicted output and the true output using an optimization algorithm, such as stochastic gradient descent. (supervised)
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.ensemble import RandomForestClassifier # multiple trees and combines them to make a decision by using "vote system" and the majority wins (supervised)
 import os
 import pickle
-from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC # find the best boundary (supervised)
 from pydub import AudioSegment
-from IPython.display import Audio
-from IPython.display import display
+from IPython.display import Audio, display
 import soundfile as sf
 import sounddevice as sd
 import sys
@@ -368,8 +365,19 @@ class My_label_encoder:
     
 
 class VGG16_Modif:
-    def __init__(self, filename_model="model_vgg16.h5"): #default il ia pe cel antrenat pe fisierele emodb
-        self.model = keras.models.load_model(filename_model)
+    def __init__(self):
+        self.model_emodb = keras.models.load_model("model_vgg16.h5")
+        self.model_dataset = keras.models.load_model("model_vgg16_dataset.h5")
+        self.dict = {"emodb": 0,
+                    "dataset": 0}
+        f = open("models_accuracy.txt", "r")
+        lines = f.readlines()
+        f.close()
+
+        for line in lines:
+            l = line.split(":")
+            acc = float(l[1].split("\n")[0])
+            self.dict[l[0]] = acc
         
     def spectrograma(self, audio, sr, n_fft=2048, hop_length=160, n_mels=64, start=0, end=1, show=True):
         # Calculati spectograma si transformati-o in decibeli
@@ -504,12 +512,8 @@ class VGG16_Modif:
 
         return msg
     
-    def get_accuracy(self):
-        f=open("accuracy.txt", "r")
-        accuracy = float(f.readlines()[0])
-        f.close()
-        
-        return accuracy
+    def get_accuracy(self, for_what):
+        return self.dict[for_what]
         
 
 class Models:
@@ -766,6 +770,7 @@ class App:
         self.mle = My_label_encoder()
         self.recorded_filename = "output.wav"
         self.vgg16 = VGG16_Modif()
+        
         if sys.version_info < (3, 6):
             err.add_error("Trebuie să ai minim python 3.6 înainte de a rula această aplicație")
         if sys.version_info >= (3, 10):
@@ -774,10 +779,10 @@ class App:
 # Sounddevice, de exemplu, necesită Python 3.6 sau mai recent, iar soundfile necesită Python 3.5 sau mai recent
 # Asa ca, pentru ca cineva sa poata rula aplicatia mea, trebuie sa aiba cel putin Python 3.6 instalat
 
-    def train(self, dir):
+    def train(self, director):
         if not err.got_error():
             # realizare preprocesare pe baza directorului dir
-            self.p.pereche_wav_txt(dir)
+            self.p.pereche_wav_txt(director)
             # extragere date
             # x este pentru fisierele audio
             # y este pentru emotii
@@ -786,8 +791,10 @@ class App:
             self.m.train(self.x, self.y)
             # afisare acuratete modele
             self.m.models_accuracy()
-            # creare tabel pentru a putea vedea detaliile mai bine
-            self.m.create_table(self.vgg16.get_accuracy())
+            if director.find("emodb/wav") != -1:
+                self.m.create_table(self.vgg16.get_accuracy("emodb"))
+            else:
+                self.m.create_table(self.vgg16.get_accuracy("dataset"))
             self.trained_models = True
 
     def save_models(self):
